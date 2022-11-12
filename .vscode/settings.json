@@ -1,0 +1,16 @@
+{
+  /* Linter and Formatter */
+  // linter
+  "eslint.packageManager": "npm", // ESLintライブラリ解決時に使うパッケージマネージャ
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true, // eslint
+    "source.fixAll.stylelint": true // Stylelint
+  },
+  // formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode", // デフォルトフォーマッターをPrettier
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "editor.tabSize": 2,
+  "editor.useTabStops": false
+}
