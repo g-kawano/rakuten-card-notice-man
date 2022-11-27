@@ -1,6 +1,23 @@
 {
-  "timeZone": "America/New_York",
+  "timeZone": "Asia/Tokyo",
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
-  "dependencies": {}
+  "executionApi": {
+    "access": "ANYONE"
+  },
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/drive",
+    "https://mail.google.com/",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/script.external_request"
+  ],
+  "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "LineBotSDK",
+        "version": "5",
+        "libraryId": "1EvYoqrPLkKgsV8FDgSjnHjW1jLp3asOSfDGEtLFO86pPSIm9PbuCQU7b"
+      }
+    ]
+  }
 }

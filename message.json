@@ -1,0 +1,234 @@
+{
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "カード利用のお知らせ",
+        "align": "center",
+        "color": "#FFFFFFFF",
+        "weight": "bold",
+        "size": "xl"
+      }
+    ],
+    "backgroundColor": "#E57F0FFF"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
+                "text": "利用者：XXX",
+                "weight": "bold"
+              },
+              {
+                "type": "separator",
+                "margin": "sm"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "11/16",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "ﾄﾞﾗｯｸﾞｽﾄｱ",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "1,200円",
+                    "flex": 3,
+                    "align": "end",
+                    "margin": "none"
+                  }
+                ],
+                "margin": "xs",
+                "justifyContent": "flex-start"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "11/16",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "ﾄﾞﾗｯｸﾞｽﾄｱ",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "1,200円",
+                    "flex": 3,
+                    "align": "end"
+                  }
+                ],
+                "margin": "xs",
+                "justifyContent": "flex-start"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "計",
+                    "flex": 6,
+                    "align": "end"
+                  },
+                  {
+                    "type": "text",
+                    "text": "2,400円",
+                    "flex": 2,
+                    "align": "end"
+                  }
+                ],
+                "margin": "sm",
+                "justifyContent": "flex-start"
+              }
+            ],
+            "margin": "xs",
+            "spacing": "xs"
+          }
+        ],
+        "spacing": "none",
+        "margin": "none"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
+                "text": "利用者：YYY",
+                "weight": "bold"
+              },
+              {
+                "type": "separator",
+                "margin": "sm"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "11/16",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "ﾄﾞﾗｯｸﾞｽﾄｱ",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "1,200円",
+                    "flex": 3,
+                    "align": "end"
+                  }
+                ],
+                "margin": "xs",
+                "justifyContent": "flex-start"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "11/16",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "ﾄﾞﾗｯｸﾞｽﾄｱ",
+                    "flex": 3
+                  },
+                  {
+                    "type": "text",
+                    "text": "1,200円",
+                    "flex": 3,
+                    "align": "end"
+                  }
+                ],
+                "margin": "xs",
+                "justifyContent": "flex-start"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "計",
+                    "flex": 6,
+                    "align": "end"
+                  },
+                  {
+                    "type": "text",
+                    "text": "2,400円",
+                    "flex": 2,
+                    "align": "end"
+                  }
+                ],
+                "margin": "sm",
+                "justifyContent": "flex-start"
+              }
+            ],
+            "margin": "xs",
+            "spacing": "xs"
+          }
+        ],
+        "spacing": "none",
+        "margin": "sm"
+      },
+      {
+        "type": "separator",
+        "margin": "xl"
+      },
+      {
+        "type": "text",
+        "text": "合計 4,800",
+        "margin": "md",
+        "align": "end",
+        "size": "md"
+      }
+    ]
+  }
+}
