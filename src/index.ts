@@ -18,7 +18,7 @@ const main = () => {
   const messageBody = message?.getPlainBody();
   const messageDate = String(message?.getDate());
 
-  if (messageBody && isDuplicateMessageDate(messageDate)) {
+  if (messageBody && !isDuplicateMessageDate(messageDate)) {
     const paymentInfoList: PaymentInfo[] = parseMessage(messageBody);
 
     // SpredSheet 保存
