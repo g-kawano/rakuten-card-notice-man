@@ -75,8 +75,8 @@ const parseMessage = (message: string): PaymentInfo[] => {
  * @returns true: 一致、false: 一致しない
  */
 const isDuplicateMessageDate = (messageDate: String | undefined) => {
-  if (MESSAGE_DATE === String(messageDate)) return false;
+  if (MESSAGE_DATE === String(messageDate)) return true;
 
   PropertiesService.getScriptProperties().setProperty("MESSAGE_DATE", String(messageDate));
-  return true;
+  return false;
 };
