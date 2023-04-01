@@ -1,26 +1,33 @@
 type BoxContentOptions = {
   type?: string;
   layout: string;
-  contents?: BoxContent[] | TextContent[];
+  contents?: Content[];
   backgroundColor?: string;
   margin?: string;
   justifyContent?: String;
 };
 
+abstract class Content {
+  type: string;
+
+  constructor(type: string) {
+    this.type = type;
+  }
+}
+
 /**
  * LINE メッセージの Box 部分をメッセージクラス
  * https://developers.line.biz/ja/reference/messaging-api/#box
  */
-export class BoxContent {
-  type: string;
+export class BoxContent extends Content {
   layout: string;
-  contents?: BoxContent[] | TextContent[];
+  contents?: Content[];
   backgroundColor?: string;
   margin?: string;
   justifyContent?: String;
 
   constructor({ layout, backgroundColor, margin, justifyContent }: BoxContentOptions) {
-    this.type = "box";
+    super("box");
     this.layout = layout;
     this.contents = [];
 
@@ -29,10 +36,7 @@ export class BoxContent {
     if (justifyContent) this.justifyContent = justifyContent;
   }
 
-  // TODO: ここの any を何とかしたい
-  // BoxContent[] | TextContent[] としてもエラーになる
-  // おそらく、contents=BoxContent[]　の時に、addContent(TextContent)ができてしまうからなんだけど
-  addContent(content: any) {
+  addContent(content: Content) {
     this.contents?.push(content);
   }
 }
@@ -53,8 +57,7 @@ type TextContentOptions = {
  * LINE メッセージの Text 部分をメッセージクラス
  * https://developers.line.biz/ja/reference/messaging-api/#text-message
  */
-export class TextContent {
-  type: string;
+export class TextContent extends Content {
   text: string;
   wrap: boolean;
   align?: string;
@@ -64,8 +67,8 @@ export class TextContent {
   flex?: number;
   margin?: string;
 
-  constructor({ type = "text", text, wrap = true, align, color, weight, size, flex, margin }: TextContentOptions) {
-    this.type = type;
+  constructor({ text, wrap = true, align, color, weight, size, flex, margin }: TextContentOptions) {
+    super("text");
     this.text = text;
     this.wrap = wrap;
 
