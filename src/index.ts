@@ -7,12 +7,8 @@ import { SpreadSheet } from "./spreadsheet";
 const MESSAGE_DATE = PropertiesService.getScriptProperties().getProperty("MESSAGE_DATE");
 
 const main = () => {
-  const dateNow = new Date();
-
   const lineClient = new Line();
-  const fileName = `楽天カード決済履歴シート_${dateNow.getFullYear().toString()}`;
-  const targetSheetName = `${(dateNow.getMonth() + 1).toString()}月`;
-  const sheet = new SpreadSheet({ fileName: fileName, targetSheetName: targetSheetName });
+  const sheet = new SpreadSheet();
 
   const message = getRakutenMail();
   const messageBody = message?.getPlainBody();
@@ -22,7 +18,7 @@ const main = () => {
     const paymentInfoList: PaymentInfo[] = parseMessage(messageBody);
 
     // SpredSheet 保存
-    const paymentRecoreds = new PaymentInfoList(paymentInfoList).getSheetRecords();
+    const paymentRecoreds = new PaymentInfoList(paymentInfoList);
     sheet.addRecords(paymentRecoreds);
 
     // 通知メッセージ作成
