@@ -7,6 +7,13 @@ export class PaymentInfo {
   user: string;
   amount: string;
 
+  constructor(date: string, store: string, user: string, amount: string) {
+    this.date = date;
+    this.store = store;
+    this.user = user;
+    this.amount = amount;
+  }
+
   /**
    * amount(合計金額)を 文字列から数値に変換します。
    * @returns 数値にキャストした合計値
@@ -18,11 +25,20 @@ export class PaymentInfo {
     return parseInt(amount, 10) || parseFloat(amount);
   }
 
-  constructor(date: string, store: string, user: string, amount: string) {
-    this.date = date;
-    this.store = store;
-    this.user = user;
-    this.amount = amount;
+  getYear(): string {
+    return this.date.split("/")[0];
+  }
+
+  getMonth(): string {
+    return this.date.split("/")[1].slice(1);
+  }
+
+  /**
+   * スプレッドシートに書き込無む用のレコードデータを取得します。
+   * @returns レコード
+   */
+  getSheetRecord(): (string | number)[] {
+    return [this.date, this.store, this.user, this.castAmountStringToNumber()];
   }
 }
 
