@@ -7,6 +7,7 @@ import { SpreadSheet } from "./spreadsheet";
 const MESSAGE_DATE = PropertiesService.getScriptProperties().getProperty("MESSAGE_DATE");
 
 const main = () => {
+  const today = new Date();
   const lineClient = new Line();
   const sheet = new SpreadSheet();
 
@@ -30,6 +31,15 @@ const main = () => {
     };
 
     lineClient.pushMessage(pushMessage);
+  }
+
+  if (isCreateChart(today)) {
+    const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+    const targetYear = today.getFullYear().toString();
+    const targetMonth = (previousMonth.getMonth() + 1).toString();
+
+    sheet.createBarChart(targetYear, targetMonth);
   }
 };
 
@@ -75,4 +85,12 @@ const isDuplicateMessageDate = (messageDate: String | undefined) => {
 
   PropertiesService.getScriptProperties().setProperty("MESSAGE_DATE", String(messageDate));
   return false;
+};
+
+/**
+ * 指定した日が、チャートを生成する日か判定します。
+ * @param targetDate
+ */
+const isCreateChart = (targetDate: Date): boolean => {
+  return targetDate.getDate() === 15;
 };
