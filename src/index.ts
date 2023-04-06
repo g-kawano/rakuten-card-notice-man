@@ -33,12 +33,14 @@ const main = () => {
     lineClient.pushMessage(pushMessage);
   }
 
+  // 毎月 15 日は前月のチャートを通知
   if (isCreateChart(today)) {
     const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
 
     const targetYear = today.getFullYear().toString();
     const targetMonth = (previousMonth.getMonth() + 1).toString();
 
+    // 棒グラフを作成
     sheet.createBarChart(targetYear, targetMonth);
   }
 };

@@ -1,5 +1,9 @@
 import { PaymentInfoList } from "./paymentInfo";
 
+type AggregatedData = {
+  [dateString: string]: number;
+};
+
 /**
  * スプレットシート操作用クラス
  */
@@ -82,17 +86,32 @@ export class SpreadSheet {
     const targetSheet = this.getSpreadSheetSheet(sheetFile, targetMonth + "月");
 
     const dataRange = targetSheet.getDataRange();
-    var dateValues = targetSheet.getRange(1, 1, dataRange.getNumRows(), 1).getValues();
-    var amountValues = targetSheet.getRange(1, 4, dataRange.getNumRows(), 1).getValues();
+    const dateValues: Date[][] = targetSheet.getRange(1, 1, dataRange.getNumRows(), 1).getValues().slice(1);
+    const amountValues: number[][] = targetSheet.getRange(1, 4, dataRange.getNumRows(), 1).getValues().slice(1);
+
+    // 同じ日時の利用金額を合計
+    const aggregatedData = dateValues.slice(1).reduce<AggregatedData>((acc, date, index) => {
+      const dateString = date[0].toLocaleDateString();
+      const amount = amountValues[index + 1][0];
+
+      if (acc[dateString]) {
+        acc[dateString] += amount;
+      } else {
+        acc[dateString] = amount;
+      }
+
+      return acc;
+    }, {});
 
     // 日時と利用金額のデータを結合
-    var chartDataValues = dateValues.map(function (row, index) {
-      return [row[0], amountValues[index][0]];
-    });
+    const chartDataValues: [string, string][] = Object.entries(aggregatedData).map(([date, amount]) => [
+      Utilities.formatDate(new Date(date), "JST", "MM/dd"),
+      amount.toLocaleString(),
+    ]);
 
     // データを日付の昇順でソート
-    chartDataValues.sort(function (a, b) {
-      return a[0] - b[0];
+    chartDataValues.sort((a, b) => {
+      return new Date(a[0]).getTime() - new Date(b[0]).getTime();
     });
 
     // 結合されたデータを新しいシートにコピー
@@ -105,10 +124,15 @@ export class SpreadSheet {
       .setChartType(Charts.ChartType.COLUMN)
       .addRange(chartDataSheet.getRange(1, 1, chartDataValues.length, 2))
       .setPosition(5, 6, 0, 0)
-      .setOption("title", "日時ごとの利用金額")
+      .setOption("title", `${targetMonth}月の利用金額`)
       .setOption("hAxis.title", "日時")
-      .setOption("vAxis.title", "利用金額")
-      .setOption("pointSize", 3) // 点のサイズを3に設定
+      .setOption("vAxis", {
+        title: "利用金額",
+        logScale: true,
+        gridlines: {
+          count: 50,
+        },
+      })
       .setOption("hAxis.format", "MM/dd") // 横軸の日付フォーマットを MM/dd に設定
       .setOption("hAxis.slantedText", true) // 斜めのテキストを有効にする
       .setOption("hAxis.slantedTextAngle", 45) // テキストの角度を45度に設定
