@@ -1,5 +1,5 @@
-import { SpreadSheet } from "./01SpreadSheet";
-import { PaymentInfo } from "./02PaymentInfo";
+import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
+import { PaymentHistory } from "@/libs/01PaymentHistory";
 
 type AggregatedData = {
   [dateString: string]: number;
@@ -20,7 +20,7 @@ export class PaymentHistorySheet extends SpreadSheet {
    * 決済履歴を追加します。
    * @param records 追加するレコード
    */
-  addPaymentsRecord(record: PaymentInfo): void {
+  addPaymentsRecord(record: PaymentHistory): void {
     super.addRecords([record.getSheetRecord()]);
   }
 
@@ -28,6 +28,7 @@ export class PaymentHistorySheet extends SpreadSheet {
    * 指定した 年月の棒グラフ を シートに挿入する
    * @param targetMonth mm
    */
+  //TODO: どちらかというと、グラフ用のサービスファイルなどをつくってそっちに実装したい
   createBarChart(targetMonth: string): void {
     const dataRange = this.sheet.getDataRange();
     const dateValues: Date[][] = this.sheet.getRange(1, 1, dataRange.getNumRows(), 1).getValues().slice(1);

@@ -1,7 +1,7 @@
 /**
  * 決済情報クラス
  */
-export class PaymentInfo {
+export class PaymentHistory {
   date: string;
   store: string;
   user: string;
@@ -45,11 +45,11 @@ export class PaymentInfo {
 /**
  * 決済情報のリストクラス
  */
-export class PaymentInfoList {
-  paymentInfoList: PaymentInfo[];
+export class PaymentHistoryList {
+  paymentHistoryList: PaymentHistory[];
 
-  constructor(paymentInfoList: PaymentInfo[]) {
-    this.paymentInfoList = paymentInfoList;
+  constructor(paymentHistoryList: PaymentHistory[]) {
+    this.paymentHistoryList = paymentHistoryList;
   }
 
   /**
@@ -57,15 +57,15 @@ export class PaymentInfoList {
    * @param userType himself 本人、familiy 家族
    * @returns 指定した利用者の決済情報リスト
    */
-  extractPerUser(userType: "himself" | "familiy"): PaymentInfoList {
+  extractPerUser(userType: "himself" | "familiy"): PaymentHistoryList {
     switch (userType) {
       case "himself":
-        const himselfPayment = this.paymentInfoList.filter((payment) => payment.user === "本人");
-        return new PaymentInfoList(himselfPayment);
+        const himselfPayment = this.paymentHistoryList.filter((payment) => payment.user === "本人");
+        return new PaymentHistoryList(himselfPayment);
 
       case "familiy":
-        const familyPayment = this.paymentInfoList.filter((payment) => payment.user === "家族");
-        return new PaymentInfoList(familyPayment);
+        const familyPayment = this.paymentHistoryList.filter((payment) => payment.user === "家族");
+        return new PaymentHistoryList(familyPayment);
     }
   }
   /**
@@ -75,7 +75,7 @@ export class PaymentInfoList {
   calcTotalAmount() {
     const regex = /[^0-9]/g;
 
-    let totalAmount = this.paymentInfoList.reduce((sum, payment) => {
+    let totalAmount = this.paymentHistoryList.reduce((sum, payment) => {
       const result = payment.amount.replace(regex, "");
       const amount = parseInt(result);
       return sum + amount;
@@ -90,9 +90,9 @@ export class PaymentInfoList {
    */
   getSheetRecords(): (string | number)[][] {
     let records = [];
-    for (const paymentInfo of this.paymentInfoList) {
+    for (const paymentHistory of this.paymentHistoryList) {
       const record = [];
-      record.push(paymentInfo.date, paymentInfo.store, paymentInfo.user, paymentInfo.castAmountStringToNumber());
+      record.push(paymentHistory.date, paymentHistory.store, paymentHistory.user, paymentHistory.castAmountStringToNumber());
       records.push(record);
     }
 

@@ -1,8 +1,8 @@
-import { Message } from "./05Mail";
-import { PaymentInfo, PaymentInfoList } from "./02PaymentInfo";
-import { NoticePaymentHistoryMessage } from "./06NoticePaymentMessage";
-import { Line } from "./03Line";
-import { PaymentHistorySheet } from "./07PaymentHistorySheet";
+import { Message } from "@/libs/Gmail/01Mail";
+import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
+import { NoticePaymentHistoryMessage } from "@/libs/Line/03NoticePaymentMessage";
+import { Line } from "@/libs/Line/01Line";
+import { PaymentHistorySheet } from "@/libs/SpreadSheet/02PaymentHistorySheet";
 
 const MESSAGE_DATE = PropertiesService.getScriptProperties().getProperty("MESSAGE_DATE");
 
@@ -15,11 +15,11 @@ const main = () => {
   const messageDate = String(message?.getDate());
 
   if (messageBody && !isDuplicateMessageDate(messageDate)) {
-    const paymentInfoList: PaymentInfo[] = parseMessage(messageBody);
+    const paymentHistoryList: PaymentHistory[] = parseMessage(messageBody);
 
     // 決済履歴保存
-    const paymentRecoreds = new PaymentInfoList(paymentInfoList);
-    for (const record of paymentRecoreds.paymentInfoList) {
+    const paymentRecoreds = new PaymentHistoryList(paymentHistoryList);
+    for (const record of paymentRecoreds.paymentHistoryList) {
       const fileName = `楽天カード決済履歴シート_${record.getYear()}`;
       const sheetName = `${record.getMonth()}月`;
       const sheet = new PaymentHistorySheet(fileName, sheetName);
@@ -28,14 +28,14 @@ const main = () => {
     }
 
     // 通知メッセージ作成
-    const noticePaymentHistoryMessage = new NoticePaymentHistoryMessage(paymentInfoList);
+    const noticePaymentHistoryMessage = new NoticePaymentHistoryMessage(paymentHistoryList);
     const pushMessage = {
       type: "flex",
       altText: "カード利用のお知らせ",
       contents: JSON.parse(JSON.stringify(noticePaymentHistoryMessage)),
     };
 
-    // lineClient.pushMessage(pushMessage);
+    lineClient.pushMessage(pushMessage);
   }
 
   // 毎月 15 日は前月のチャートを通知
@@ -73,17 +73,17 @@ const getRakutenMail = (): GoogleAppsScript.Gmail.GmailMessage | undefined => {
  * @param message メール本文
  * @returns 決済情報オブジェクト
  */
-const parseMessage = (message: string): PaymentInfo[] => {
-  const paymentInfoList = [];
+const parseMessage = (message: string): PaymentHistory[] => {
+  const paymentHistoryList = [];
   const matched: RegExpMatchArray | null = message.match(new RegExp("■利用日.+? ポイント", "sg"));
   if (matched) {
     for (const paymentMessage of matched) {
       const m = new Message(paymentMessage);
-      paymentInfoList.push(new PaymentInfo(m.getUseDay(), m.getUseStore(), m.getUser(), m.getAmount()));
+      paymentHistoryList.push(new PaymentHistory(m.getUseDay(), m.getUseStore(), m.getUser(), m.getAmount()));
     }
   }
 
-  return paymentInfoList;
+  return paymentHistoryList;
 };
 
 /**
