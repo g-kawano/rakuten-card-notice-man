@@ -1,5 +1,5 @@
-import { PaymentInfo, PaymentInfoList } from "./paymentInfo";
-import { BoxContent, TextContent, Saparator } from "./lineMessage";
+import { PaymentInfo, PaymentInfoList } from "./02PaymentInfo";
+import { BoxContent, TextContent, Saparator } from "./04LineMessage";
 
 const DISPLAY_HIMSELF = PropertiesService.getScriptProperties().getProperty("DISPLAY_HIMSELF");
 const DISPLAY_FAMILIY = PropertiesService.getScriptProperties().getProperty("DISPLAY_FAMILIY");

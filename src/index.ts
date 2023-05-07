@@ -1,15 +1,14 @@
-import { Message } from "./mail";
-import { PaymentInfo, PaymentInfoList } from "./paymentInfo";
-import { NoticePaymentHistoryMessage } from "./noticePaymentMessage";
-import { Line } from "./line";
-import { SpreadSheet } from "./spreadsheet";
+import { Message } from "./05Mail";
+import { PaymentInfo, PaymentInfoList } from "./02PaymentInfo";
+import { NoticePaymentHistoryMessage } from "./06NoticePaymentMessage";
+import { Line } from "./03Line";
+import { PaymentHistorySheet } from "./07PaymentHistorySheet";
 
 const MESSAGE_DATE = PropertiesService.getScriptProperties().getProperty("MESSAGE_DATE");
 
 const main = () => {
   const today = new Date();
   const lineClient = new Line();
-  const sheet = new SpreadSheet();
 
   const message = getRakutenMail();
   const messageBody = message?.getPlainBody();
@@ -18,9 +17,15 @@ const main = () => {
   if (messageBody && !isDuplicateMessageDate(messageDate)) {
     const paymentInfoList: PaymentInfo[] = parseMessage(messageBody);
 
-    // SpredSheet 保存
+    // 決済履歴保存
     const paymentRecoreds = new PaymentInfoList(paymentInfoList);
-    sheet.addRecords(paymentRecoreds);
+    for (const record of paymentRecoreds.paymentInfoList) {
+      const fileName = `楽天カード決済履歴シート_${record.getYear()}`;
+      const sheetName = `${record.getMonth()}月`;
+      const sheet = new PaymentHistorySheet(fileName, sheetName);
+
+      sheet.addPaymentsRecord(record);
+    }
 
     // 通知メッセージ作成
     const noticePaymentHistoryMessage = new NoticePaymentHistoryMessage(paymentInfoList);
@@ -30,7 +35,7 @@ const main = () => {
       contents: JSON.parse(JSON.stringify(noticePaymentHistoryMessage)),
     };
 
-    lineClient.pushMessage(pushMessage);
+    // lineClient.pushMessage(pushMessage);
   }
 
   // 毎月 15 日は前月のチャートを通知
@@ -40,8 +45,12 @@ const main = () => {
     const targetYear = today.getFullYear().toString();
     const targetMonth = (previousMonth.getMonth() + 1).toString();
 
+    const fileName = `楽天カード決済履歴シート_${targetYear}`;
+    const sheetName = `${targetMonth}月`;
+    const sheet = new PaymentHistorySheet(fileName, sheetName);
+
     // 棒グラフを作成
-    sheet.createBarChart(targetYear, targetMonth);
+    sheet.createBarChart(targetMonth);
   }
 };
 

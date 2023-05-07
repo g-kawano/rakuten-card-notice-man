@@ -68,7 +68,6 @@ export class PaymentInfoList {
         return new PaymentInfoList(familyPayment);
     }
   }
-
   /**
    * 合計金額を計算します。
    * @returns 合計金額
