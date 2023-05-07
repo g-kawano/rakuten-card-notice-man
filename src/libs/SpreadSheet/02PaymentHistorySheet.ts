@@ -16,7 +16,12 @@ export class PaymentHistorySheet extends SpreadSheet {
 
   constructor(fileName: string, sheetName: string) {
     super(fileName, sheetName);
-    //TODO: sheet が 0 行の場合は、ヘッダーを追加する処理
+    //sheet が 0 行の場合は、ヘッダーを追加する
+    const countRow = this.sheet.getDataRange().getNumRows();
+    // スプレッドシートはデフォルトで 1 行目が含まれている
+    if (countRow === 1) {
+      this.sheet.appendRow(this.header);
+    }
   }
 
   /**
