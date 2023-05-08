@@ -3,7 +3,11 @@ import { PaymentHistory } from "@/libs/01PaymentHistory";
 import { StoreCategorySheet } from "@/libs/SpreadSheet/03StoreCategorySheet";
 
 type AggregatedData = {
-  [dateString: string]: number;
+  [datestring: string]: number;
+};
+
+type AggregatedDataPerCategory = {
+  [categoryName: string]: number;
 };
 
 const MASTER_SPREAD_SHEET_FILE = PropertiesService.getScriptProperties().getProperty("MASTER_SPREAD_SHEET_FILE");
@@ -48,7 +52,6 @@ export class PaymentHistorySheet extends SpreadSheet {
    * 指定した 年月の棒グラフ を シートに挿入する
    * @param targetMonth mm
    */
-  //TODO: どちらかというと、グラフ用のサービスファイルなどをつくってそっちに実装したい
   createBarChart(targetMonth: string): void {
     const dataRange = this.sheet.getDataRange();
     const dateValues: Date[][] = this.sheet.getRange(1, 1, dataRange.getNumRows(), 1).getValues().slice(1);
@@ -102,6 +105,56 @@ export class PaymentHistorySheet extends SpreadSheet {
       .setOption("hAxis.slantedText", true) // 斜めのテキストを有効にする
       .setOption("hAxis.slantedTextAngle", 45) // テキストの角度を45度に設定
       .setOption("hAxis.viewWindowMode", "pretty") // 横軸の表示間隔を調整
+      .build();
+
+    // グラフをシートに挿入
+    this.sheet.insertChart(chart);
+  }
+
+  createPieChart(targetMonth: string): void {
+    const dataRange = this.sheet.getDataRange();
+    const amountValues: number[][] = this.sheet.getRange(2, 4, dataRange.getNumRows(), 1).getValues();
+    const categoryValues: string[][] = this.sheet.getRange(2, 5, dataRange.getNumRows(), 1).getValues();
+
+    // 同じカテゴリーの利用金額を合計
+    const aggregatedData = categoryValues.reduce<AggregatedDataPerCategory>((acc, category, index) => {
+      const categoryName = category[0];
+      const amount = amountValues[index][0];
+
+      if (acc[categoryName]) {
+        acc[categoryName] += amount;
+      } else {
+        acc[categoryName] = amount;
+      }
+
+      return acc;
+    }, {});
+
+    // 日時と利用金額のデータを結合
+    const chartDataValues: [string, string][] = Object.entries(aggregatedData).map(([category, amount]) => [
+      `${category} ${amount.toLocaleString()} 円`,
+      amount.toLocaleString(),
+    ]);
+
+    // 結合されたデータを新しいシートにコピー
+    const chartDataSheet = super.getSpreadSheetSheet(this.spreadSheet, `PieChartData-${targetMonth}月`);
+    chartDataSheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
+
+    // グラフを作成
+    const chart = this.sheet
+      .newChart()
+      .setChartType(Charts.ChartType.PIE)
+      .addRange(chartDataSheet.getRange(1, 1, chartDataValues.length, 2))
+      .setOption("title", `${targetMonth}月のカテゴリー別金額`)
+      .setOption("height", 400)
+      .setOption("width", 600)
+      .setOption("is3D", true)
+      .setOption("pieHole", 0.2)
+      .setOption("pieSliceText", "value")
+      .setOption("aggregationTarget", "category")
+      .setOption("legend.position", "right")
+      .setPosition(6, 1, 0, 0)
+      .setOption('pieSliceText', 'none')
       .build();
 
     // グラフをシートに挿入

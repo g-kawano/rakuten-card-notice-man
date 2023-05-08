@@ -49,8 +49,8 @@ const main = () => {
     const sheetName = `${targetMonth}月`;
     const sheet = new PaymentHistorySheet(fileName, sheetName);
 
-    // 棒グラフを作成
     sheet.createBarChart(targetMonth);
+    sheet.createPieChart(targetMonth);
   }
 };
 
