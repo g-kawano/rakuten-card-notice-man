@@ -2,7 +2,7 @@ import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
 import { PaymentHistory } from "@/libs/01PaymentHistory";
 import { StoreCategorySheet } from "@/libs/SpreadSheet/03StoreCategorySheet";
 
-type AggregatedData = {
+type AggregatedDataPerDate = {
   [datestring: string]: number;
 };
 
@@ -54,13 +54,17 @@ export class PaymentHistorySheet extends SpreadSheet {
    */
   createBarChart(targetMonth: string): void {
     const dataRange = this.sheet.getDataRange();
-    const dateValues: Date[][] = this.sheet.getRange(1, 1, dataRange.getNumRows(), 1).getValues().slice(1);
-    const amountValues: number[][] = this.sheet.getRange(1, 4, dataRange.getNumRows(), 1).getValues().slice(1);
+    const dateValues: Date[][] = this.sheet.getRange(2, 1, dataRange.getNumRows(), 1).getValues();
+    const amountValues: number[][] = this.sheet.getRange(2, 4, dataRange.getNumRows(), 1).getValues();
+
+    // デフォルトで末尾の空行がついてくるので消す
+    dateValues.pop();
+    amountValues.pop();
 
     // 同じ日時の利用金額を合計
-    const aggregatedData = dateValues.slice(1).reduce<AggregatedData>((acc, date, index) => {
+    const aggregatedData = dateValues.reduce<AggregatedDataPerDate>((acc, date, index) => {
       const dateString = date[0].toLocaleDateString();
-      const amount = amountValues[index + 1][0];
+      const amount = amountValues[index][0];
 
       if (acc[dateString]) {
         acc[dateString] += amount;
@@ -92,7 +96,7 @@ export class PaymentHistorySheet extends SpreadSheet {
       .setChartType(Charts.ChartType.COLUMN)
       .addRange(chartDataSheet.getRange(1, 1, chartDataValues.length, 2))
       .setPosition(5, 6, 0, 0)
-      .setOption("title", `${targetMonth}月の利用金額`)
+      .setOption("title", `${targetMonth}月の利用日別金額`)
       .setOption("hAxis.title", "日時")
       .setOption("vAxis", {
         title: "利用金額",
@@ -154,7 +158,7 @@ export class PaymentHistorySheet extends SpreadSheet {
       .setOption("aggregationTarget", "category")
       .setOption("legend.position", "right")
       .setPosition(6, 1, 0, 0)
-      .setOption('pieSliceText', 'none')
+      .setOption("pieSliceText", "none")
       .build();
 
     // グラフをシートに挿入
