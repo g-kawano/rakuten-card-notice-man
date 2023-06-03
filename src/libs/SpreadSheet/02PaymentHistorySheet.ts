@@ -135,10 +135,10 @@ export class PaymentHistorySheet extends SpreadSheet {
     }, {});
 
     // 日時と利用金額のデータを結合
-    const chartDataValues: [string, string][] = Object.entries(aggregatedData).map(([category, amount]) => [
-      `${category} ${amount.toLocaleString()} 円`,
-      amount.toLocaleString(),
-    ]);
+    const chartDataValues: [string, string][] = Object.entries(aggregatedData).map(([category, amount]) => {
+      const categoryName = category === "" ? "未カテゴリー" : category;
+      return [`${categoryName} ${amount.toLocaleString()} 円`, amount.toLocaleString()];
+    });
 
     // 結合されたデータを新しいシートにコピー
     const chartDataSheet = super.getSpreadSheetSheet(this.spreadSheet, `PieChartData-${targetMonth}月`);
