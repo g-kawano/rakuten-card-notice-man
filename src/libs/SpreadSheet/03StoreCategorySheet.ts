@@ -1,7 +1,7 @@
 import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
 
 /**
- * 決済履歴スプレットシート操作用クラス
+ * 店舗カテゴリーシート操作用クラス
  */
 export class StoreCategorySheet extends SpreadSheet {
   sheetName: string;
