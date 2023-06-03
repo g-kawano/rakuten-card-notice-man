@@ -1,0 +1,193 @@
+{
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "X 月のまとめ💸",
+        "align": "center",
+        "color": "#FFFFFFFF",
+        "weight": "bold",
+        "size": "xl"
+      }
+    ],
+    "backgroundColor": "#1E90FF"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "支出：",
+                "weight": "bold",
+                "size": "md",
+                "flex": 4
+              },
+              {
+                "type": "text",
+                "text": "¥123,4567",
+                "align": "end",
+                "flex": 5,
+                "size": "md",
+                "weight": "bold",
+                "decoration": "underline"
+              },
+              {
+                "type": "separator",
+                "margin": "sm"
+              }
+            ]
+          },
+          {
+            "type": "separator",
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "filler"
+              },
+              {
+                "type": "text",
+                "text": "前月比",
+                "weight": "bold",
+                "size": "md",
+                "flex": 4
+              },
+              {
+                "type": "text",
+                "text": "↑ ¥1,234",
+                "align": "end",
+                "flex": 5,
+                "size": "md",
+                "weight": "bold",
+                "decoration": "none",
+                "color": "#FF0000"
+              },
+              {
+                "type": "separator",
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "filler"
+                  },
+                  {
+                    "type": "text",
+                    "flex": 3,
+                    "text": "固定費",
+                    "size": "sm"
+                  },
+                  {
+                    "type": "text",
+                    "text": "住宅ローン",
+                    "flex": 3,
+                    "size": "sm"
+                  },
+                  {
+                    "type": "text",
+                    "text": "¥ 12,345",
+                    "flex": 3,
+                    "align": "end",
+                    "margin": "none"
+                  }
+                ],
+                "margin": "xs",
+                "justifyContent": "flex-start"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "filler",
+                    "flex": 4
+                  },
+                  {
+                    "type": "text",
+                    "text": "管理費",
+                    "flex": 3,
+                    "size": "sm"
+                  },
+                  {
+                    "type": "text",
+                    "text": "¥ 12,345",
+                    "align": "end",
+                    "margin": "none",
+                    "flex": 3
+                  }
+                ],
+                "margin": "xs",
+                "justifyContent": "flex-start"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "filler",
+                    "flex": 4
+                  },
+                  {
+                    "type": "text",
+                    "text": "奨学金",
+                    "flex": 3,
+                    "size": "sm"
+                  },
+                  {
+                    "type": "text",
+                    "text": "¥ 12,345",
+                    "align": "end",
+                    "margin": "none",
+                    "flex": 3
+                  }
+                ],
+                "margin": "xs",
+                "justifyContent": "flex-start"
+              }
+            ],
+            "margin": "sm",
+            "spacing": "xs"
+          }
+        ],
+        "spacing": "none",
+        "margin": "none"
+      },
+      {
+        "type": "separator",
+        "margin": "xl"
+      },
+      {
+        "type": "image",
+        "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+        "size": "full",
+        "margin": "none",
+        "offsetTop": "none",
+        "align": "center"
+      }
+    ]
+  }
+}
