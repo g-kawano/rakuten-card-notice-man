@@ -50,7 +50,7 @@ export class PaymentHistorySheet extends SpreadSheet {
 
   /**
    * 指定した 年月の棒グラフ を シートに挿入する
-   * @param targetMonth mm
+   * @param targetMonth チャート対象の月 (ex. 5月の場合：5, 12 月の場合: 12)
    */
   createBarChart(targetMonth: string): void {
     const dataRange = this.sheet.getDataRange();
@@ -91,11 +91,11 @@ export class PaymentHistorySheet extends SpreadSheet {
     chartDataSheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
 
     // グラフを作成
-    var chart = this.sheet
+    var chart = chartDataSheet
       .newChart()
       .setChartType(Charts.ChartType.COLUMN)
       .addRange(chartDataSheet.getRange(1, 1, chartDataValues.length, 2))
-      .setPosition(5, 6, 0, 0)
+      .setPosition(2, 4, 0, 0)
       .setOption("title", `${targetMonth}月の利用日別金額`)
       .setOption("hAxis.title", "日時")
       .setOption("vAxis", {
@@ -112,9 +112,13 @@ export class PaymentHistorySheet extends SpreadSheet {
       .build();
 
     // グラフをシートに挿入
-    this.sheet.insertChart(chart);
+    chartDataSheet.insertChart(chart);
   }
 
+  /**
+   * 指定した カテゴリー別円グラフ を シートに挿入する
+   * @param targetMonth チャート対象の月 (ex. 5月の場合：5, 12 月の場合: 12)
+   */
   createPieChart(targetMonth: string): void {
     const dataRange = this.sheet.getDataRange();
     const amountValues: number[][] = this.sheet.getRange(2, 4, dataRange.getNumRows(), 1).getValues();
@@ -145,7 +149,7 @@ export class PaymentHistorySheet extends SpreadSheet {
     chartDataSheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
 
     // グラフを作成
-    const chart = this.sheet
+    const chart = chartDataSheet
       .newChart()
       .setChartType(Charts.ChartType.PIE)
       .addRange(chartDataSheet.getRange(1, 1, chartDataValues.length, 2))
@@ -157,11 +161,11 @@ export class PaymentHistorySheet extends SpreadSheet {
       .setOption("pieSliceText", "value")
       .setOption("aggregationTarget", "category")
       .setOption("legend.position", "right")
-      .setPosition(6, 1, 0, 0)
+      .setPosition(2, 4, 0, 0)
       .setOption("pieSliceText", "none")
       .build();
 
     // グラフをシートに挿入
-    this.sheet.insertChart(chart);
+    chartDataSheet.insertChart(chart);
   }
 }
