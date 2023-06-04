@@ -8,10 +8,13 @@
  *  ※ line-bot-sdk-nodejs を使えば不要になるが、GAS で npm install するには一手間必要なのでここで独自実装している
  */
 
+type Size = number | "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "3xl" | "4xl" | "5xl" | "full";
+type Margin = number | "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+
 /**
  * Flex メッセージの コンテントの型
  */
-abstract class Content {
+export abstract class Content {
   type: string;
 
   constructor(type: string) {
@@ -20,19 +23,19 @@ abstract class Content {
 }
 
 /**
- * Flex メッセージの Box コンテントの型
+ * Box コンテント作成パラメータ型
  */
 type BoxContentOptions = {
   type?: string;
   layout: string;
   contents?: Content[];
   backgroundColor?: string;
-  margin?: string;
+  margin?: Margin;
   justifyContent?: String;
 };
 
 /**
- * Flex メッセージの メッセージの型
+ * Text コンテント作成パラメータ型
  */
 type TextContentOptions = {
   type?: string;
@@ -41,21 +44,46 @@ type TextContentOptions = {
   align?: string;
   color?: string;
   weight?: string;
-  size?: string;
+  size?: Size;
   flex?: number;
-  margin?: string;
+  margin?: Margin;
+  decoration?: "underline" | "line-through";
 };
 
 /**
- * Flex メッセージの セパレート コンテントの型
+ * Image コンテント作成パラメータ型
+ */
+type ImageContentOptions = {
+  type?: string;
+  url: string;
+  size: Size;
+  margin?: Margin;
+  align?: string;
+};
+
+/**
+ * Flex メッセージの セパレート コンテントクラス
  */
 export class Separator {
   type: string;
-  margin: string;
+  margin: Margin;
 
-  constructor(margin: string) {
+  constructor(margin: Margin) {
     this.type = "separator";
     this.margin = margin;
+  }
+}
+
+/**
+ * Flex メッセージの Filler コンテントクラス
+ */
+export class Filler {
+  type: string;
+  flex?: number;
+
+  constructor(flex?: number) {
+    this.type = "filler";
+    this.flex = flex;
   }
 }
 
@@ -67,7 +95,7 @@ export class BoxContent extends Content {
   layout: string;
   contents?: Content[];
   backgroundColor?: string;
-  margin?: string;
+  margin?: Margin;
   justifyContent?: String;
 
   constructor({ layout, backgroundColor, margin, justifyContent }: BoxContentOptions) {
@@ -100,11 +128,12 @@ export class TextContent extends Content {
   align?: string;
   color?: string;
   weight?: string;
-  size?: string;
+  size?: Size;
   flex?: number;
-  margin?: string;
+  margin?: Margin;
+  decoration?: "underline" | "line-through";
 
-  constructor({ text, wrap = true, align, color, weight, size, flex, margin }: TextContentOptions) {
+  constructor({ text, wrap = true, align, color, weight, size, flex, margin, decoration }: TextContentOptions) {
     super("text");
     this.text = text;
     this.wrap = wrap;
@@ -115,5 +144,26 @@ export class TextContent extends Content {
     if (size) this.size = size;
     if (flex) this.flex = flex;
     if (margin) this.margin = margin;
+    if (decoration) this.margin = margin;
+  }
+}
+
+/**
+ * LINE メッセージの Image 部分をメッセージクラス
+ * https://developers.line.biz/ja/reference/messaging-api/#image-message
+ */
+export class ImageContent extends Content {
+  url: string;
+  size: Size;
+  margin?: Margin;
+  align?: string;
+
+  constructor({ url, size, margin, align }: ImageContentOptions) {
+    super("image");
+    this.url = url;
+    this.size = size;
+
+    if (margin) this.margin = margin;
+    if (align) this.align = align;
   }
 }
