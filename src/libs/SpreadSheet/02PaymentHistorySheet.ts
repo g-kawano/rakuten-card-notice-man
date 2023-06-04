@@ -29,7 +29,7 @@ export class PaymentHistorySheet extends SpreadSheet {
   }
 
   /**
-   * 決済履歴を追加します。
+   * 決済履歴を追加する
    * @param records 追加するレコード
    */
   addPaymentsRecord(record: PaymentHistory): void {
@@ -39,7 +39,7 @@ export class PaymentHistorySheet extends SpreadSheet {
       const category = storeCategory.searchCategoryByStoreName(record.store);
 
       //TODO: カテゴリーを取得できなかった場合は、M_store シートにレコードを追加する
-      // 実際は以下のケースが考えられるが、現状は 1. のみを考慮する。
+      // 実際は以下のケースが考えられるが、現状は 1. のみを考慮する
       // 1. M_storeに店舗が登録されていない
       // 2. T_store_category にレコードが追加されていない（←ここは手動 or 将来的に LINE BOT から設定できるようにする）
       const addRecord = record.getSheetRecord();

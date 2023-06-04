@@ -11,8 +11,8 @@ export class SpreadSheet {
   }
 
   /**
-   * 対象の spreadSheet の操作クラスを取得します
-   * 既に作成されている場合はファイル ID で読み込み、ない場合は新規作成し、その結果を返します。
+   * 対象の spreadSheet の操作クラスを取得する
+   * 既に作成されている場合はファイル ID で読み込み、ない場合は新規作成し、その結果を返す
    * @param fileName  対象spreadSheet ファイル名
    * @returns
    */
@@ -30,8 +30,8 @@ export class SpreadSheet {
   }
 
   /**
-   * 対象の spreadSheet の Sheet 操作クラスを取得します(ex, 楽天カード決済履歴シート_2022 ファイルの "1月"シート)
-   * 既に作成されている場合はシート名で読み込み、ない場合は新規作成し、その結果を返します。
+   * 対象の spreadSheet の Sheet 操作クラスを取得する(ex, 楽天カード決済履歴シート_2022 ファイルの "1月"シート)
+   * 既に作成されている場合はシート名で読み込み、ない場合は新規作成し、その結果を返す
    * @param spreadSheet 対象の spreadSheet の操作クラス
    * @param targetSheetName 対象の spreadSheet のシート名
    * @returns
@@ -53,7 +53,7 @@ export class SpreadSheet {
   }
 
   /**
-   * 対象のシートの末尾にレコードを追加します。
+   * 対象のシートの末尾にレコードを追加する
    * @param records 追加するレコード
    */
   addRecords<T>(records: T[][]): void {

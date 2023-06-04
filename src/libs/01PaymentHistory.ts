@@ -15,7 +15,7 @@ export class PaymentHistory {
   }
 
   /**
-   * amount(合計金額)を 文字列から数値に変換します。
+   * amount(合計金額)を 文字列から数値に変換する
    * @returns 数値にキャストした合計値
    */
   castAmountStringToNumber(): number {
@@ -34,7 +34,7 @@ export class PaymentHistory {
   }
 
   /**
-   * スプレッドシートに書き込無む用のレコードデータを取得します。
+   * スプレッドシートに書き込無む用のレコードデータを取得する
    * @returns レコード
    */
   getSheetRecord(): (string | number)[] {
@@ -53,23 +53,23 @@ export class PaymentHistoryList {
   }
 
   /**
-   * 指定した利用者ごとの履歴を抽出します。
-   * @param userType himself 本人、familiy 家族
+   * 指定した利用者ごとの履歴を抽出する
+   * @param userType himself 本人、family 家族
    * @returns 指定した利用者の決済情報リスト
    */
-  extractPerUser(userType: "himself" | "familiy"): PaymentHistoryList {
+  extractPerUser(userType: "himself" | "family"): PaymentHistoryList {
     switch (userType) {
       case "himself":
         const himselfPayment = this.paymentHistoryList.filter((payment) => payment.user === "本人");
         return new PaymentHistoryList(himselfPayment);
 
-      case "familiy":
+      case "family":
         const familyPayment = this.paymentHistoryList.filter((payment) => payment.user === "家族");
         return new PaymentHistoryList(familyPayment);
     }
   }
   /**
-   * 合計金額を計算します。
+   * 合計金額を計算して返す
    * @returns 合計金額
    */
   calcTotalAmount() {
@@ -85,7 +85,7 @@ export class PaymentHistoryList {
   }
 
   /**
-   * スプレッドシートに書き込無む用のレコードデータを取得します。
+   * スプレッドシートに書き込無む用のレコードデータを取得する
    * @returns レコード
    */
   getSheetRecords(): (string | number)[][] {

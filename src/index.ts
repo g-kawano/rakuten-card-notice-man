@@ -55,7 +55,7 @@ const main = () => {
 };
 
 /**
- * Gmail の受信ボックスから楽天決済案内メールを取得します。
+ * Gmail の受信ボックスから楽天決済案内メールを取得する
  * @returns メール情報
  */
 const getRakutenMail = (): GoogleAppsScript.Gmail.GmailMessage | undefined => {
@@ -69,7 +69,7 @@ const getRakutenMail = (): GoogleAppsScript.Gmail.GmailMessage | undefined => {
 };
 
 /**
- * メール本文から決済履歴の情報を抽出し、決済情報オブジェクトを取得します。
+ * メール本文から決済履歴の情報を抽出し、決済情報オブジェクトを取得する
  * @param message メール本文
  * @returns 決済情報オブジェクト
  */
@@ -87,7 +87,7 @@ const parseMessage = (message: string): PaymentHistory[] => {
 };
 
 /**
- * 取得したメール受信日時が、前回の受信日時と同一か判定します。
+ * 取得したメール受信日時が、前回の受信日時と同一か判定する
  * @param messageDate メッセージの受信日時
  * @returns true: 一致、false: 一致しない
  */
@@ -99,7 +99,7 @@ const isDuplicateMessageDate = (messageDate: String | undefined) => {
 };
 
 /**
- * 指定した日が、チャートを生成する日か判定します。
+ * 指定した日が、チャートを生成する日か判定する
  * @param targetDate
  */
 const isCreateChart = (targetDate: Date): boolean => {

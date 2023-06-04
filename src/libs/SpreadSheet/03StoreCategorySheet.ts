@@ -11,7 +11,7 @@ export class StoreCategorySheet extends SpreadSheet {
   }
 
   /**
-   * 店舗名が一致する カテゴリー名を取得します。
+   * 店舗名が一致する カテゴリー名を取得する
    * @param storeName 店舗名
    */
   searchCategoryByStoreName(storeName: string): string {

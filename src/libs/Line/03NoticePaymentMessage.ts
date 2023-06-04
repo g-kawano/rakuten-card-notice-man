@@ -1,8 +1,8 @@
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
-import { BoxContent, TextContent, Saparator } from "@/libs/Line/02LineMessage";
+import { BoxContent, TextContent, Separator } from "@/libs/Line/02LineMessage";
 
 const DISPLAY_HIMSELF = PropertiesService.getScriptProperties().getProperty("DISPLAY_HIMSELF");
-const DISPLAY_FAMILIY = PropertiesService.getScriptProperties().getProperty("DISPLAY_FAMILIY");
+const DISPLAY_FAMILY = PropertiesService.getScriptProperties().getProperty("DISPLAY_FAMILY");
 
 /**
  * 決済情報通知メッセージ用クラス
@@ -19,7 +19,7 @@ export class NoticePaymentHistoryMessage {
   }
 
   /**
-   * 通知メッセージのヘッダー部分を取得します。
+   * 通知メッセージのヘッダー部分を取得する
    * @returns Flex メッセージのヘッダーコンテント
    */
   getHeader() {
@@ -37,32 +37,32 @@ export class NoticePaymentHistoryMessage {
   }
 
   /**
-   * 通知メッセージの本文を取得します
+   * 通知メッセージの本文を取得する
    * @param paymentHistoryList 決済情報リスト
    * @returns 通知メッセージ本文を表示するメッセージオブジェクト
    */
   getBody(paymentHistoryList: PaymentHistoryList) {
     const bodyContent = new BoxContent({ layout: "vertical" });
     const himselfPaymentContent = this.createPaymentHistoryMessage(paymentHistoryList, "himself");
-    const familiyPaymentContent = this.createPaymentHistoryMessage(paymentHistoryList, "familiy");
+    const familyPaymentContent = this.createPaymentHistoryMessage(paymentHistoryList, "family");
     const allTotalAmountContent = this.createTotalAmountRecord(paymentHistoryList, true);
 
     bodyContent.addContent(himselfPaymentContent);
     bodyContent.addContent(new BoxContent({ layout: "vertical", margin: "lg" }));
-    bodyContent.addContent(familiyPaymentContent);
-    bodyContent.addContent(new Saparator("xl"));
+    bodyContent.addContent(familyPaymentContent);
+    bodyContent.addContent(new Separator("xl"));
     bodyContent.addContent(allTotalAmountContent);
 
     return bodyContent;
   }
 
   /**
-   * 指定した利用者毎の決済情報メッセージを作成します。
+   * 指定した利用者毎の決済情報メッセージを作成する
    * @param paymentHistoryList 決済情報リスト
-   * @param userType himself or familiy
+   * @param userType himself or family
    * @returns 決済情報全体を表示するメッセージオブジェクト
    */
-  createPaymentHistoryMessage(paymentHistoryList: PaymentHistoryList, userType: "himself" | "familiy") {
+  createPaymentHistoryMessage(paymentHistoryList: PaymentHistoryList, userType: "himself" | "family") {
     const paymentContent = new BoxContent({ layout: "vertical" });
 
     const subjectContent = this.createSubjectMessage(userType);
@@ -78,15 +78,15 @@ export class NoticePaymentHistoryMessage {
   }
 
   /**
-   * 決済情報メッセージの件名部分を作成します。
-   * @param userType himself or familiy
+   * 決済情報メッセージの件名部分を作成する
+   * @param userType himself or family
    * @returns 決済情報の件名を表示するメッセージオブジェクト
    */
-  createSubjectMessage(userType: "himself" | "familiy"): BoxContent {
+  createSubjectMessage(userType: "himself" | "family"): BoxContent {
     let subject;
 
     const displayHimself = DISPLAY_HIMSELF ? DISPLAY_HIMSELF : "本人";
-    const displayFamiliy = DISPLAY_HIMSELF ? DISPLAY_FAMILIY : "家族";
+    const displayFamily = DISPLAY_HIMSELF ? DISPLAY_FAMILY : "家族";
 
     // メッセージ件名部分
     const subjectContent = new BoxContent({ layout: "vertical" });
@@ -95,11 +95,11 @@ export class NoticePaymentHistoryMessage {
       case "himself":
         subject = new TextContent({ text: `利用者: ${displayHimself}`, weight: "bold" });
         break;
-      case "familiy":
-        subject = new TextContent({ text: `利用者: ${displayFamiliy}`, weight: "bold" });
+      case "family":
+        subject = new TextContent({ text: `利用者: ${displayFamily}`, weight: "bold" });
         break;
     }
-    const separator = new Saparator("sm");
+    const separator = new Separator("sm");
     subjectContent.addContent(subject);
     subjectContent.addContent(separator);
 
@@ -107,7 +107,7 @@ export class NoticePaymentHistoryMessage {
   }
 
   /**
-   * 決済通知メッセージの決済情報部分を作成します。
+   * 決済通知メッセージの決済情報部分を作成する
    * @param paymentHistoryList
    * @returns 決済情報部分を表示するメッセージオブジェクト
    */
@@ -126,7 +126,7 @@ export class NoticePaymentHistoryMessage {
   }
 
   /**
-   * 決済情報の 1 レコード部分を作成します。
+   * 決済情報の 1 レコード部分を作成する
    * @param paymentHistory
    * @returns 決済情報の1 レコードを表示するッセージオブジェクト
    */
@@ -156,7 +156,7 @@ export class NoticePaymentHistoryMessage {
   }
 
   /**
-   * トータル金額を表示するメッセージを作成します。
+   * トータル金額を表示するメッセージを作成する
    * @param paymentHistoryList 決済情報リスト
    * @param isAll true 全て、false 利用者毎
    * @returns 合計金額を表示するメッセージオブジェクト

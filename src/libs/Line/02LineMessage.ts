@@ -1,3 +1,27 @@
+/**
+ * Flex メッセージを形成するためのクラス
+ * 対応タイプ
+ *  - box コンテント
+ *  - text コンテント
+ *  - separator コンテント
+ *
+ *  ※ line-bot-sdk-nodejs を使えば不要になるが、GAS で npm install するには一手間必要なのでここで独自実装している
+ */
+
+/**
+ * Flex メッセージの コンテントの型
+ */
+abstract class Content {
+  type: string;
+
+  constructor(type: string) {
+    this.type = type;
+  }
+}
+
+/**
+ * Flex メッセージの Box コンテントの型
+ */
 type BoxContentOptions = {
   type?: string;
   layout: string;
@@ -7,11 +31,31 @@ type BoxContentOptions = {
   justifyContent?: String;
 };
 
-abstract class Content {
-  type: string;
+/**
+ * Flex メッセージの メッセージの型
+ */
+type TextContentOptions = {
+  type?: string;
+  text: string;
+  wrap?: boolean;
+  align?: string;
+  color?: string;
+  weight?: string;
+  size?: string;
+  flex?: number;
+  margin?: string;
+};
 
-  constructor(type: string) {
-    this.type = type;
+/**
+ * Flex メッセージの セパレート コンテントの型
+ */
+export class Separator {
+  type: string;
+  margin: string;
+
+  constructor(margin: string) {
+    this.type = "separator";
+    this.margin = margin;
   }
 }
 
@@ -36,22 +80,15 @@ export class BoxContent extends Content {
     if (justifyContent) this.justifyContent = justifyContent;
   }
 
+  /**
+   * Box コンテント内にコンテントを追加する
+   * @param content コンテント
+   * box コンテントの入れ子も可能
+   */
   addContent(content: Content) {
     this.contents?.push(content);
   }
 }
-
-type TextContentOptions = {
-  type?: string;
-  text: string;
-  wrap?: boolean;
-  align?: string;
-  color?: string;
-  weight?: string;
-  size?: string;
-  flex?: number;
-  margin?: string;
-};
 
 /**
  * LINE メッセージの Text 部分をメッセージクラス
@@ -78,15 +115,5 @@ export class TextContent extends Content {
     if (size) this.size = size;
     if (flex) this.flex = flex;
     if (margin) this.margin = margin;
-  }
-}
-
-export class Saparator {
-  type: string;
-  margin: string;
-
-  constructor(margin: string) {
-    this.type = "separator";
-    this.margin = margin;
   }
 }
