@@ -49,6 +49,28 @@ export class PaymentHistorySheet extends SpreadSheet {
   }
 
   /**
+   * 利用金額の合計を算出して返す
+   */
+  totalAmount(): number {
+    const lastRow = this.sheet.getLastRow();
+
+    // 利用金額の列の範囲を取得
+    const range = this.sheet.getRange(2, 4, lastRow - 1);
+    const values = range.getValues();
+
+    let totalAmount = 0;
+
+    for (const record of values) {
+      let amount = record[0];
+      if (typeof amount === "number") {
+        totalAmount += amount;
+      }
+    }
+
+    return totalAmount;
+  }
+
+  /**
    * 指定した 年月の棒グラフ を シートに挿入する
    * @param targetMonth チャート対象の月 (ex. 5月の場合：5, 12 月の場合: 12)
    */
