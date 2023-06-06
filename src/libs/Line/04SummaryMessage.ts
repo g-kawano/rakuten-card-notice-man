@@ -12,11 +12,16 @@ export class SummaryMessage {
   body?: BoxContent;
   targetYear: string;
   targetMonth: string;
+  fixedCostSheet: FixedCostSheet;
 
   constructor(targetYear: string, targetMonth: string) {
     this.type = "bubble";
     this.targetYear = targetYear;
     this.targetMonth = targetMonth;
+    //FIXME:　null の時にちゃんとエラーハンドリングする
+    const SHEET_FILE_NAME = PropertiesService.getScriptProperties().getProperty("MASTER_SPREAD_SHEET_FILE") ?? "";
+    this.fixedCostSheet = new FixedCostSheet(SHEET_FILE_NAME, "M_Fixed_cost");
+
     this.header = this.makeHeaderContent();
     this.body = this.makeBodyContent();
   }
@@ -93,8 +98,9 @@ export class SummaryMessage {
       flex: 4,
     });
 
+    const totalAmount = paymentHistorySheet.sumColumn(2, 4) + this.fixedCostSheet.sumColumn(2, 3);
     const spendingValue = new TextContent({
-      text: `¥ ${paymentHistorySheet.totalAmount().toLocaleString()}`,
+      text: `¥ ${totalAmount.toLocaleString()}`,
       align: "end",
       flex: 5,
       size: "md",
@@ -120,7 +126,7 @@ export class SummaryMessage {
 
     const previousSheet = this.newPaymentHistorySheet(this.targetYear, String(previousMonth));
 
-    return targetSheet.totalAmount() - previousSheet.totalAmount();
+    return targetSheet.sumColumn(2, 4) - previousSheet.sumColumn(2, 4);
   }
 
   /**
@@ -210,13 +216,7 @@ export class SummaryMessage {
   makeFixedCostContent(): BoxContent {
     const amountComparisonContent = new BoxContent({ layout: "vertical", margin: "sm" });
 
-    //FIXME:　null の時にちゃんとエラーハンドリングする
-    const MASTER_SPREAD_SHEET_FILE =
-      PropertiesService.getScriptProperties().getProperty("MASTER_SPREAD_SHEET_FILE") ?? "";
-
-    const fixedCostSheet = new FixedCostSheet(MASTER_SPREAD_SHEET_FILE, "M_Fixed_cost");
-
-    for (const [index, record] of fixedCostSheet.scanRecord().entries()) {
+    for (const [index, record] of this.fixedCostSheet.scanRecord().entries()) {
       const isFirst = index === 0;
 
       const costName = record[0];
