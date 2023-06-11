@@ -1,6 +1,7 @@
 import { Message } from "@/libs/Gmail/01Mail";
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
 import { NoticePaymentHistoryMessage } from "@/libs/Line/03NoticePaymentMessage";
+import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
 import { Line } from "@/libs/Line/01Line";
 import { PaymentHistorySheet } from "@/libs/SpreadSheet/02PaymentHistorySheet";
 
@@ -49,8 +50,16 @@ const main = () => {
     const sheetName = `${targetMonth}月`;
     const sheet = new PaymentHistorySheet(fileName, sheetName);
 
+    const summaryMessage = new SummaryMessage(targetYear, targetMonth);
+    const pushMessage = {
+      type: "flex",
+      altText: "カード利用のお知らせ",
+      contents: summaryMessage.pushMessageContent(),
+    };
+
     sheet.createBarChart(targetMonth);
     sheet.createPieChart(targetMonth);
+    lineClient.pushMessage(pushMessage);
   }
 };
 

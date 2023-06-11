@@ -69,4 +69,28 @@ export class SpreadSheet {
       this.sheet.getRange(1, 1, row, column).setValues(values);
     }
   }
+
+  /**
+   * 対象列の合計を算出して返す
+   * @param rowNumber 開始行番号
+   * @param columnNumber 列番号
+   */
+  sumColumn(startRowNumber: number, columnNumber: number): number {
+    const lastRow = this.sheet.getLastRow();
+
+    //対象列の範囲を取得
+    const range = this.sheet.getRange(startRowNumber, columnNumber, lastRow - 1);
+    const values = range.getValues();
+
+    let totalAmount = 0;
+
+    for (const record of values) {
+      let amount = record[0];
+      if (typeof amount === "number") {
+        totalAmount += amount;
+      }
+    }
+
+    return totalAmount;
+  }
 }
