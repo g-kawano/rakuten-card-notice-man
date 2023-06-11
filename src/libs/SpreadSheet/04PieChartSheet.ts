@@ -1,8 +1,8 @@
 import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
 import { Drive } from "@/libs/Drive/01Drive";
+import { Setting } from "@/00Setting";
 
-//FIXME: null の場合はちゃんとエラーハンドリングする
-const DRIVE_FOLDER_NAME = PropertiesService.getScriptProperties().getProperty("DRIVE_FOLDER_NAME") ?? "";
+const pieChartSheetSettings = new Setting();
 
 /**
  * 円グラフシート操作用クラス
@@ -29,7 +29,7 @@ export class PieChartSheet extends SpreadSheet {
   uploadChart(fileName: string): void {
     const drive = new Drive();
     const graphImg = this.getChartImg();
-    const folder = drive.createDriveFolderByFolderName(DRIVE_FOLDER_NAME);
+    const folder = drive.createDriveFolderByFolderName(pieChartSheetSettings.DRIVE_FOLDER_NAME);
     folder.createFile(graphImg.setName(fileName));
   }
 

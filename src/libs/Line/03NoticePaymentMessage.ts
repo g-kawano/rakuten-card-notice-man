@@ -1,8 +1,8 @@
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
 import { BoxContent, TextContent, Separator } from "@/libs/Line/02LineMessage";
+import { Setting } from "@/00Setting";
 
-const DISPLAY_HIMSELF = PropertiesService.getScriptProperties().getProperty("DISPLAY_HIMSELF");
-const DISPLAY_FAMILY = PropertiesService.getScriptProperties().getProperty("DISPLAY_FAMILY");
+const noticePaymentMessageSettings = new Setting();
 
 /**
  * 決済情報通知メッセージ用クラス
@@ -85,8 +85,10 @@ export class NoticePaymentHistoryMessage {
   createSubjectMessage(userType: "himself" | "family"): BoxContent {
     let subject;
 
-    const displayHimself = DISPLAY_HIMSELF ? DISPLAY_HIMSELF : "本人";
-    const displayFamily = DISPLAY_HIMSELF ? DISPLAY_FAMILY : "家族";
+    const displayHimself =
+      noticePaymentMessageSettings.DISPLAY_HIMSELF !== null ? noticePaymentMessageSettings.DISPLAY_HIMSELF : "本人";
+    const displayFamily =
+      noticePaymentMessageSettings.DISPLAY_HIMSELF !== null ? noticePaymentMessageSettings.DISPLAY_FAMILY : "家族";
 
     // メッセージ件名部分
     const subjectContent = new BoxContent({ layout: "vertical" });

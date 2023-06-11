@@ -1,6 +1,7 @@
 import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
 import { PaymentHistory } from "@/libs/01PaymentHistory";
 import { StoreCategorySheet } from "@/libs/SpreadSheet/03StoreCategorySheet";
+import { Setting } from "@/00Setting";
 
 type AggregatedDataPerDate = {
   [datestring: string]: number;
@@ -10,7 +11,7 @@ type AggregatedDataPerCategory = {
   [categoryName: string]: number;
 };
 
-const MASTER_SPREAD_SHEET_FILE = PropertiesService.getScriptProperties().getProperty("MASTER_SPREAD_SHEET_FILE");
+const paymentHistorySheetSettings = new Setting();
 
 /**
  * 決済履歴スプレットシート操作用クラス
@@ -33,19 +34,20 @@ export class PaymentHistorySheet extends SpreadSheet {
    * @param records 追加するレコード
    */
   addPaymentsRecord(record: PaymentHistory): void {
-    if (MASTER_SPREAD_SHEET_FILE !== null) {
-      // 使用店舗のカテゴリーを取得する
-      const storeCategory = new StoreCategorySheet(MASTER_SPREAD_SHEET_FILE, "JOIN_store_category");
-      const category = storeCategory.searchCategoryByStoreName(record.store);
+    // 使用店舗のカテゴリーを取得する
+    const storeCategory = new StoreCategorySheet(
+      paymentHistorySheetSettings.MASTER_SPREAD_SHEET_FILE,
+      "JOIN_store_category"
+    );
+    const category = storeCategory.searchCategoryByStoreName(record.store);
 
-      //TODO: カテゴリーを取得できなかった場合は、M_store シートにレコードを追加する
-      // 実際は以下のケースが考えられるが、現状は 1. のみを考慮する
-      // 1. M_storeに店舗が登録されていない
-      // 2. T_store_category にレコードが追加されていない（←ここは手動 or 将来的に LINE BOT から設定できるようにする）
-      const addRecord = record.getSheetRecord();
-      addRecord.push(category);
-      super.addRecords([addRecord]);
-    }
+    //TODO: カテゴリーを取得できなかった場合は、M_store シートにレコードを追加する
+    // 実際は以下のケースが考えられるが、現状は 1. のみを考慮する
+    // 1. M_storeに店舗が登録されていない
+    // 2. T_store_category にレコードが追加されていない（←ここは手動 or 将来的に LINE BOT から設定できるようにする）
+    const addRecord = record.getSheetRecord();
+    addRecord.push(category);
+    super.addRecords([addRecord]);
   }
 
   /**

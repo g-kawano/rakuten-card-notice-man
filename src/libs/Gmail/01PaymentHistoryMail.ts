@@ -1,4 +1,4 @@
-import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
+import { PaymentHistory} from "@/libs/01PaymentHistory";
 
 /**
  * 決済履歴メールクラス

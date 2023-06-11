@@ -4,8 +4,9 @@ import { NoticePaymentHistoryMessage } from "@/libs/Line/03NoticePaymentMessage"
 import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
 import { Line } from "@/libs/Line/01Line";
 import { PaymentHistorySheet } from "@/libs/SpreadSheet/02PaymentHistorySheet";
+import { Setting } from "./00Setting";
 
-const MESSAGE_DATE = PropertiesService.getScriptProperties().getProperty("MESSAGE_DATE");
+const settings = new Setting();
 
 const main = () => {
   const today = new Date();
@@ -20,7 +21,7 @@ const main = () => {
   if (!shouldNoticeMessage(messageReceivedDate)) return;
 
   // 重複送信を避けるため、GAS の プロパティに受信日を保存しておく
-  PropertiesService.getScriptProperties().setProperty("MESSAGE_DATE", String(messageReceivedDate));
+  settings.setMessageDate(messageReceivedDate);
 
   const paymentHistoryList: PaymentHistory[] = paymentHistoryMail.buildPaymentHistoryList();
 
@@ -60,7 +61,7 @@ const shouldCreateChart = (targetDate: Date): boolean => {
  * @param targetDate
  */
 const shouldNoticeMessage = (messageDate: string): boolean => {
-  return MESSAGE_DATE === String(messageDate);
+  return settings.MESSAGE_DATE !== String(messageDate);
 };
 
 /**

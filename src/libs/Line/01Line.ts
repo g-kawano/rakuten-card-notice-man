@@ -1,10 +1,10 @@
-const LINE_CHANNEL_ACCESS_TOKEN = PropertiesService.getScriptProperties().getProperty("LINE_CHANNEL_ACCESS_TOKEN");
-const LINE_GROUP_ID = PropertiesService.getScriptProperties().getProperty("LINE_GROUP_ID");
+import { Setting } from "@/00Setting";
 
+const lineSettings = new Setting()
 // @ts-ignore ts(2304) GAS のライブラリから読み込んでいるため
 //https://github.com/kobanyan/line-bot-sdk-gas
 const lineClient = new LineBotSDK.Client({
-  channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
+  channelAccessToken: lineSettings.LINE_CHANNEL_ACCESS_TOKEN,
 });
 
 /**
@@ -17,6 +17,6 @@ export class Line {
    * @param message 送信メッセージ内容
    */
   pushMessage(message: any): void {
-    lineClient.pushMessage(LINE_GROUP_ID, message);
+    lineClient.pushMessage(lineSettings.LINE_GROUP_ID, message);
   }
 }

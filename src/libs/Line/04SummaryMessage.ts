@@ -2,6 +2,9 @@ import { BoxContent, TextContent, ImageContent, Separator, Filler } from "@/libs
 import { PaymentHistorySheet } from "../SpreadSheet/02PaymentHistorySheet";
 import { FixedCostSheet } from "../SpreadSheet/05FixedCostSheet";
 import { PieChartSheet } from "../SpreadSheet/04PieChartSheet";
+import { Setting } from "@/00Setting";
+
+const summaryMessagesSettings = new Setting()
 
 /**
  * サマリーメッセージ用クラス
@@ -18,9 +21,7 @@ export class SummaryMessage {
     this.type = "bubble";
     this.targetYear = targetYear;
     this.targetMonth = targetMonth;
-    //FIXME:　null の時にちゃんとエラーハンドリングする
-    const SHEET_FILE_NAME = PropertiesService.getScriptProperties().getProperty("MASTER_SPREAD_SHEET_FILE") ?? "";
-    this.fixedCostSheet = new FixedCostSheet(SHEET_FILE_NAME, "M_Fixed_cost");
+    this.fixedCostSheet = new FixedCostSheet(summaryMessagesSettings.MASTER_SPREAD_SHEET_FILE, "M_Fixed_cost");
 
     this.header = this.makeHeaderContent();
     this.body = this.makeBodyContent();
