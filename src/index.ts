@@ -1,4 +1,4 @@
-import { Message } from "@/libs/Gmail/01Mail";
+import { PaymentHistoryMail } from "@/libs/Gmail/01PaymentHistoryMail";
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
 import { NoticePaymentHistoryMessage } from "@/libs/Line/03NoticePaymentMessage";
 import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
@@ -9,58 +9,28 @@ const MESSAGE_DATE = PropertiesService.getScriptProperties().getProperty("MESSAG
 
 const main = () => {
   const today = new Date();
-  const lineClient = new Line();
 
-  const message = getRakutenMail();
-  const messageBody = message?.getPlainBody();
-  const messageDate = String(message?.getDate());
+  const mail = getRakutenMail();
 
-  if (messageBody && !isDuplicateMessageDate(messageDate)) {
-    const paymentHistoryList: PaymentHistory[] = parseMessage(messageBody);
+  if (mail === undefined) return;
 
-    // 決済履歴保存
-    const paymentRecoreds = new PaymentHistoryList(paymentHistoryList);
-    for (const record of paymentRecoreds.paymentHistoryList) {
-      const fileName = `楽天カード決済履歴シート_${record.getYear()}`;
-      const sheetName = `${record.getMonth()}月`;
-      const sheet = new PaymentHistorySheet(fileName, sheetName);
+  const paymentHistoryMail = new PaymentHistoryMail(mail.getPlainBody());
 
-      sheet.addPaymentsRecord(record);
-    }
+  const messageReceivedDate = mail.getDate().toString();
+  if (!shouldNoticeMessage(messageReceivedDate)) return;
 
-    // 通知メッセージ作成
-    const noticePaymentHistoryMessage = new NoticePaymentHistoryMessage(paymentHistoryList);
-    const pushMessage = {
-      type: "flex",
-      altText: "カード利用のお知らせ",
-      contents: JSON.parse(JSON.stringify(noticePaymentHistoryMessage)),
-    };
+  // 重複送信を避けるため、GAS の プロパティに受信日を保存しておく
+  PropertiesService.getScriptProperties().setProperty("MESSAGE_DATE", String(messageReceivedDate));
 
-    lineClient.pushMessage(pushMessage);
-  }
+  const paymentHistoryList: PaymentHistory[] = paymentHistoryMail.buildPaymentHistoryList();
 
-  // 毎月 15 日は前月のチャートを通知
-  if (isCreateChart(today)) {
-    const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+  savePaymentHistorySheet(paymentHistoryList);
+  sendPaymentHistoryMessage(paymentHistoryList);
 
-    const targetYear = today.getFullYear().toString();
-    const targetMonth = (previousMonth.getMonth() + 1).toString();
+  if (!shouldCreateChart(today)) return;
 
-    const fileName = `楽天カード決済履歴シート_${targetYear}`;
-    const sheetName = `${targetMonth}月`;
-    const sheet = new PaymentHistorySheet(fileName, sheetName);
-
-    const summaryMessage = new SummaryMessage(targetYear, targetMonth);
-    const pushMessage = {
-      type: "flex",
-      altText: "カード利用のお知らせ",
-      contents: summaryMessage.pushMessageContent(),
-    };
-
-    sheet.createBarChart(targetMonth);
-    sheet.createPieChart(targetMonth);
-    lineClient.pushMessage(pushMessage);
-  }
+  createChart(today);
+  sendSummaryMessage(today);
 };
 
 /**
@@ -78,39 +48,85 @@ const getRakutenMail = (): GoogleAppsScript.Gmail.GmailMessage | undefined => {
 };
 
 /**
- * メール本文から決済履歴の情報を抽出し、決済情報オブジェクトを取得する
- * @param message メール本文
- * @returns 決済情報オブジェクト
- */
-const parseMessage = (message: string): PaymentHistory[] => {
-  const paymentHistoryList = [];
-  const matched: RegExpMatchArray | null = message.match(new RegExp("■利用日.+? ポイント", "sg"));
-  if (matched) {
-    for (const paymentMessage of matched) {
-      const m = new Message(paymentMessage);
-      paymentHistoryList.push(new PaymentHistory(m.getUseDay(), m.getUseStore(), m.getUser(), m.getAmount()));
-    }
-  }
-
-  return paymentHistoryList;
-};
-
-/**
- * 取得したメール受信日時が、前回の受信日時と同一か判定する
- * @param messageDate メッセージの受信日時
- * @returns true: 一致、false: 一致しない
- */
-const isDuplicateMessageDate = (messageDate: String | undefined) => {
-  if (MESSAGE_DATE === String(messageDate)) return true;
-
-  PropertiesService.getScriptProperties().setProperty("MESSAGE_DATE", String(messageDate));
-  return false;
-};
-
-/**
- * 指定した日が、チャートを生成する日か判定する
+ * チャートを生成するかどうか
  * @param targetDate
  */
-const isCreateChart = (targetDate: Date): boolean => {
+const shouldCreateChart = (targetDate: Date): boolean => {
   return targetDate.getDate() === 15;
+};
+
+/**
+ * 通知をするかどうか
+ * @param targetDate
+ */
+const shouldNoticeMessage = (messageDate: string): boolean => {
+  return MESSAGE_DATE === String(messageDate);
+};
+
+/**
+ *  決済履歴情報をスプレッドシートに保存する
+ * @param paymentHistoryList 決済履歴情報リストクラス
+ */
+const savePaymentHistorySheet = (paymentHistoryList: PaymentHistory[]) => {
+  // 決済履歴保存
+  const paymentRecords = new PaymentHistoryList(paymentHistoryList);
+  for (const record of paymentRecords.paymentHistoryList) {
+    const fileName = `楽天カード決済履歴シート_${record.getYear()}`;
+    const sheetName = `${record.getMonth()}月`;
+    const sheet = new PaymentHistorySheet(fileName, sheetName);
+
+    sheet.addPaymentsRecord(record);
+  }
+};
+
+/**
+ * 決済履歴情報を LINE に送信する
+ * @param paymentHistoryList 決済履歴情報リストクラス
+ */
+const sendPaymentHistoryMessage = (paymentHistoryList: PaymentHistory[]) => {
+  const lineClient = new Line();
+  // 通知メッセージ作成
+  const noticePaymentHistoryMessage = new NoticePaymentHistoryMessage(paymentHistoryList);
+  const pushMessage = {
+    type: "flex",
+    altText: "カード利用のお知らせ",
+    contents: JSON.parse(JSON.stringify(noticePaymentHistoryMessage)),
+  };
+
+  lineClient.pushMessage(pushMessage);
+};
+
+/**
+ * チャートを作成する
+ * @param today new Date()
+ */
+const createChart = (today: Date) => {
+  const targetYear = today.getFullYear().toString();
+  const targetMonth = today.getMonth().toString();
+
+  const fileName = `楽天カード決済履歴シート_${targetYear}`;
+  const sheetName = `${targetMonth}月`;
+  const sheet = new PaymentHistorySheet(fileName, sheetName);
+
+  sheet.createBarChart(targetMonth);
+  sheet.createPieChart(targetMonth);
+};
+
+/**
+ * サマリーメッセージを LINE に送信する
+ * @param today new Date()
+ */
+const sendSummaryMessage = (today: Date) => {
+  const lineClient = new Line();
+  const targetYear = today.getFullYear().toString();
+  const targetMonth = today.getMonth().toString();
+
+  const summaryMessage = new SummaryMessage(targetYear, targetMonth);
+  const pushMessage = {
+    type: "flex",
+    altText: "カード利用のお知らせ",
+    contents: summaryMessage.pushMessageContent(),
+  };
+
+  lineClient.pushMessage(pushMessage);
 };
