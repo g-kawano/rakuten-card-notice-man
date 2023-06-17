@@ -4,7 +4,7 @@
 export class Drive {
   private driveApp: GoogleAppsScript.Drive.DriveApp;
 
-  constructor(driveApp: GoogleAppsScript.Drive.DriveApp) {
+  constructor(driveApp: GoogleAppsScript.Drive.DriveApp = DriveApp) {
     this.driveApp = driveApp;
   }
 
