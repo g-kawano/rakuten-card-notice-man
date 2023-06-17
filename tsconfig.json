@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    "types": ["jest", "google-apps-script"],
     "target": "ES2020" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     "module": "commonjs" /* Specify what module code is generated. */,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
@@ -8,7 +9,7 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "include": ["src/**/*.ts", "src/**/*.d.ts"]
+    }
+    // "include": ["src/**/*.ts", "src/**/*.d.ts", "tests/**/*.ts"]
   }
 }

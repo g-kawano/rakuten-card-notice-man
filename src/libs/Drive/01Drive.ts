@@ -4,7 +4,7 @@
 export class Drive {
   private driveApp: GoogleAppsScript.Drive.DriveApp;
 
-  constructor(driveApp: GoogleAppsScript.Drive.DriveApp = DriveApp) {
+  constructor(driveApp: GoogleAppsScript.Drive.DriveApp) {
     this.driveApp = driveApp;
   }
 
@@ -13,12 +13,9 @@ export class Drive {
    * @param folderName フォルダー名
    */
   findFolderByName(folderName: string): GoogleAppsScript.Drive.Folder {
-    const folders = this.driveApp.getFolders();
+    const folders = this.driveApp.getFoldersByName(folderName);
     while (folders.hasNext()) {
-      const folder = folders.next();
-      if (folder.getName() === folderName) {
-        return folder;
-      }
+      return folders.next();
     }
     throw new Error(`Folder "${folderName}" does not exist.`);
   }
@@ -27,7 +24,7 @@ export class Drive {
    * 指定したファイル名のファイルを返す
    * @param fileName ファイル名
    */
-  findFileByName(fileName: string): GoogleAppsScript.Drive.File | null {
+  findFileByName(fileName: string): GoogleAppsScript.Drive.File {
     var files = this.driveApp.getFilesByName(fileName);
     if (files.hasNext()) {
       return files.next();
