@@ -2,47 +2,38 @@
  * Google Drive 操作用クラス
  */
 export class Drive {
+  private driveApp: GoogleAppsScript.Drive.DriveApp;
+
+  constructor(driveApp: GoogleAppsScript.Drive.DriveApp = DriveApp) {
+    this.driveApp = driveApp;
+  }
+
   /**
-   * フォルダーID を返す
-   * なければ null を返す
+   * 指定したフォルダー名のフォルダーを返す
+   * @param folderName フォルダー名
    */
-  private getFolderIdByFolderName(folderName: string): string | null {
-    const folders = DriveApp.getFolders();
+  findFolderByName(folderName: string): GoogleAppsScript.Drive.Folder {
+    const folders = this.driveApp.getFolders();
     while (folders.hasNext()) {
-      var folder = folders.next();
+      const folder = folders.next();
       if (folder.getName() === folderName) {
-        return folder.getId();
+        return folder;
       }
     }
-    return null;
+    throw new Error(`Folder "${folderName}" does not exist.`);
   }
 
   /**
-   * 指定したフォルダ名の folder インスタンスを返す
-   * @param folderName フォルダ名
-   */
-  createDriveFolderByFolderName(folderName: string): GoogleAppsScript.Drive.Folder {
-    const folderId = this.getFolderIdByFolderName(folderName);
-
-    if (folderId === null) {
-      throw new Error("folder id is null!");
-    }
-
-    return DriveApp.getFolderById(folderId);
-  }
-
-  /**
-   * 指定したファイル名の file インスタンスを返す
+   * 指定したファイル名のファイルを返す
    * @param fileName ファイル名
    */
-  createDriveFileByName(fileName: string): GoogleAppsScript.Drive.File | null {
-    var files = DriveApp.getFilesByName(fileName);
+  findFileByName(fileName: string): GoogleAppsScript.Drive.File | null {
+    var files = this.driveApp.getFilesByName(fileName);
     if (files.hasNext()) {
-      var file = files.next();
-      return file;
-    } else {
-      return null;
+      return files.next();
     }
+
+    throw new Error(`File "${fileName}" does not exist.`);
   }
 
   /**
@@ -52,7 +43,7 @@ export class Drive {
    * @param fileName ファイル名
    */
   deleteFile(folderName: string, fileName: string) {
-    const folder = this.createDriveFolderByFolderName(folderName);
+    const folder = this.findFolderByName(folderName);
     folder.getFilesByName(fileName).next().setTrashed(true);
   }
 }

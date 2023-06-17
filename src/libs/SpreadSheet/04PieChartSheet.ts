@@ -29,7 +29,7 @@ export class PieChartSheet extends SpreadSheet {
   uploadChart(fileName: string): void {
     const drive = new Drive();
     const graphImg = this.getChartImg();
-    const folder = drive.createDriveFolderByFolderName(pieChartSheetSettings.DRIVE_FOLDER_NAME);
+    const folder = drive.findFolderByName(pieChartSheetSettings.DRIVE_FOLDER_NAME);
     folder.createFile(graphImg.setName(fileName));
   }
 
@@ -38,7 +38,7 @@ export class PieChartSheet extends SpreadSheet {
    */
   downloadChartUrl(fileName: string): string {
     const drive = new Drive();
-    const file = drive.createDriveFileByName(fileName);
+    const file = drive.findFileByName(fileName);
 
     if (file === null) {
       throw new Error("File does not exist!");
