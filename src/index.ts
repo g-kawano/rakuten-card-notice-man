@@ -87,14 +87,9 @@ const savePaymentHistorySheet = (paymentHistoryList: PaymentHistory[]) => {
 const sendPaymentHistoryMessage = (paymentHistoryList: PaymentHistory[]) => {
   const lineClient = new Line();
   // 通知メッセージ作成
-  const noticePaymentHistoryMessage = new NoticePaymentHistoryMessage(paymentHistoryList);
-  const pushMessage = {
-    type: "flex",
-    altText: "カード利用のお知らせ",
-    contents: JSON.parse(JSON.stringify(noticePaymentHistoryMessage)),
-  };
+  const noticeMessages = new NoticePaymentHistoryMessage(paymentHistoryList);
 
-  lineClient.pushMessage(pushMessage);
+  lineClient.pushMessage(noticeMessages.buildSendMessage());
 };
 
 /**
@@ -123,11 +118,6 @@ const sendSummaryMessage = (today: Date) => {
   const targetMonth = today.getMonth().toString();
 
   const summaryMessage = new SummaryMessage(targetYear, targetMonth);
-  const pushMessage = {
-    type: "flex",
-    altText: "カード利用のお知らせ",
-    contents: summaryMessage.pushMessageContent(),
-  };
 
-  lineClient.pushMessage(pushMessage);
+  lineClient.pushMessage(summaryMessage.buildSendMessage());
 };

@@ -1,111 +1,26 @@
 /**
- * Flex メッセージを形成するためのクラス
- * 対応タイプ
- *  - box コンテント
- *  - text コンテント
- *  - separator コンテント
- *
- *  ※ line-bot-sdk-nodejs を使えば不要になるが、GAS で npm install するには一手間必要なのでここで独自実装している
+ * Flex メッセージを形成するためのクラス郡
  */
 
-type Size = number | "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "3xl" | "4xl" | "5xl" | "full";
-type Margin = number | "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
-
-/**
- * Flex メッセージの コンテントの型
- */
-export abstract class Content {
-  type: string;
-
-  constructor(type: string) {
-    this.type = type;
-  }
-}
-
-/**
- * Box コンテント作成パラメータ型
- */
-type BoxContentOptions = {
-  type?: string;
-  layout: string;
-  contents?: Content[];
-  backgroundColor?: string;
-  margin?: Margin;
-  justifyContent?: String;
-};
-
-/**
- * Text コンテント作成パラメータ型
- */
-type TextContentOptions = {
-  type?: string;
-  text: string;
-  wrap?: boolean;
-  align?: string;
-  color?: string;
-  weight?: string;
-  size?: Size;
-  flex?: number;
-  margin?: Margin;
-  decoration?: "underline" | "line-through";
-};
-
-/**
- * Image コンテント作成パラメータ型
- */
-type ImageContentOptions = {
-  type?: string;
-  url: string;
-  size: Size;
-  margin?: Margin;
-  align?: string;
-};
-
-/**
- * Flex メッセージの セパレート コンテントクラス
- */
-export class Separator {
-  type: string;
-  margin: Margin;
-
-  constructor(margin: Margin) {
-    this.type = "separator";
-    this.margin = margin;
-  }
-}
-
-/**
- * Flex メッセージの Filler コンテントクラス
- */
-export class Filler {
-  type: string;
-  flex?: number;
-
-  constructor(flex?: number) {
-    this.type = "filler";
-    this.flex = flex;
-  }
-}
+import { FlexBox, FlexComponent, FlexImage, FlexSeparator, FlexText, FlexFiller } from "@line/bot-sdk";
 
 /**
  * LINE メッセージの Box 部分をメッセージクラス
  * https://developers.line.biz/ja/reference/messaging-api/#box
  */
-export class BoxContent extends Content {
-  layout: string;
-  contents?: Content[];
-  backgroundColor?: string;
-  margin?: Margin;
-  justifyContent?: String;
+export class BoxContent {
+  boxContent: FlexBox;
 
-  constructor({ layout, backgroundColor, margin, justifyContent }: BoxContentOptions) {
-    super("box");
-    this.layout = layout;
-    this.contents = [];
-
-    if (backgroundColor) this.backgroundColor = backgroundColor;
-    if (margin) this.margin = margin;
-    if (justifyContent) this.justifyContent = justifyContent;
+  // 必要なものだけインターフェースとして提供する
+  constructor({ layout, backgroundColor, margin, justifyContent }: Omit<FlexBox, "type" | "contents">) {
+    this.boxContent = {
+      type: "box",
+      layout: layout,
+      contents: [],
+      backgroundColor: backgroundColor,
+      margin: margin,
+      justifyContent: justifyContent,
+    };
   }
 
   /**
@@ -113,38 +28,43 @@ export class BoxContent extends Content {
    * @param content コンテント
    * box コンテントの入れ子も可能
    */
-  addContent(content: Content) {
-    this.contents?.push(content);
+  addContent(content: FlexComponent) {
+    this.boxContent.contents?.push(content);
   }
 }
+
+type TextContentProperties = {
+  text: string;
+  wrap?: boolean;
+  align?: "start" | "end" | "center";
+  color?: string;
+  weight?: "regular" | "bold";
+  size?: string | "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "3xl" | "4xl" | "5xl";
+  flex?: number;
+  margin?: string | "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+  decoration?: string;
+};
 
 /**
  * LINE メッセージの Text 部分をメッセージクラス
  * https://developers.line.biz/ja/reference/messaging-api/#text-message
+ * インプリできる型情報がなかったので、自前で定義
  */
-export class TextContent extends Content {
-  text: string;
-  wrap: boolean;
-  align?: string;
-  color?: string;
-  weight?: string;
-  size?: Size;
-  flex?: number;
-  margin?: Margin;
-  decoration?: "underline" | "line-through";
-
-  constructor({ text, wrap = true, align, color, weight, size, flex, margin, decoration }: TextContentOptions) {
-    super("text");
-    this.text = text;
-    this.wrap = wrap;
-
-    if (align) this.align = align;
-    if (color) this.color = color;
-    if (weight) this.weight = weight;
-    if (size) this.size = size;
-    if (flex) this.flex = flex;
-    if (margin) this.margin = margin;
-    if (decoration) this.margin = margin;
+export class TextContent {
+  textContent: FlexText;
+  constructor({ text, wrap = true, align, color, weight, size, flex, margin, decoration }: TextContentProperties) {
+    this.textContent = {
+      type: "text",
+      text: text,
+      wrap: wrap,
+      flex: flex,
+      align: align,
+      color: color,
+      weight: weight,
+      size: size,
+      margin: margin,
+      decoration: decoration,
+    };
   }
 }
 
@@ -152,18 +72,44 @@ export class TextContent extends Content {
  * LINE メッセージの Image 部分をメッセージクラス
  * https://developers.line.biz/ja/reference/messaging-api/#image-message
  */
-export class ImageContent extends Content {
-  url: string;
-  size: Size;
-  margin?: Margin;
-  align?: string;
+export class ImageContent implements Omit<FlexImage, "type"> {
+  type: FlexImage["type"];
+  url: FlexImage["url"];
+  size: FlexImage["size"];
+  margin?: FlexImage["margin"];
+  align?: FlexImage["align"];
 
-  constructor({ url, size, margin, align }: ImageContentOptions) {
-    super("image");
+  constructor({ url, size, margin, align }: Omit<FlexImage, "type">) {
+    this.type = "image";
     this.url = url;
     this.size = size;
+    this.margin = margin;
+    this.align = align;
+  }
+}
 
-    if (margin) this.margin = margin;
-    if (align) this.align = align;
+/**
+ * Flex メッセージの セパレート コンテントクラス
+ */
+export class SeparatorContent implements FlexSeparator {
+  type: FlexSeparator["type"];
+  margin: FlexSeparator["margin"];
+
+  constructor(margin: FlexSeparator["margin"]) {
+    this.type = "separator";
+    this.margin = margin;
+  }
+}
+
+/**
+ * Flex メッセージの セパレート コンテントクラス
+ */
+export class FillerContent implements FlexFiller {
+  type: FlexFiller["type"];
+  flex?: FlexFiller["flex"];
+
+  constructor(flex?: FlexFiller["flex"]) {
+    this.type = "filler";
+    this.flex = flex;
   }
 }

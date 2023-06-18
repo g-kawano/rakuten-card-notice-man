@@ -1,18 +1,19 @@
-import { BoxContent, TextContent, ImageContent, Separator, Filler } from "@/libs/Line/02LineMessage";
+import { BoxContent, TextContent, ImageContent, SeparatorContent, FillerContent } from "@/libs/Line/02LineMessage";
 import { PaymentHistorySheet } from "../SpreadSheet/02PaymentHistorySheet";
 import { FixedCostSheet } from "../SpreadSheet/05FixedCostSheet";
 import { PieChartSheet } from "../SpreadSheet/04PieChartSheet";
 import { Setting } from "@/00Setting";
+import { FlexBubble, FlexBox, Message } from "@line/bot-sdk";
 
-const summaryMessagesSettings = new Setting()
+const summaryMessagesSettings = new Setting();
 
 /**
  * サマリーメッセージ用クラス
  */
 export class SummaryMessage {
-  type: string;
-  header: BoxContent;
-  body?: BoxContent;
+  type: FlexBubble["type"];
+  header: FlexBox;
+  body?: FlexBox;
   targetYear: string;
   targetMonth: string;
   fixedCostSheet: FixedCostSheet;
@@ -23,18 +24,22 @@ export class SummaryMessage {
     this.targetMonth = targetMonth;
     this.fixedCostSheet = new FixedCostSheet(summaryMessagesSettings.MASTER_SPREAD_SHEET_FILE, "M_Fixed_cost");
 
-    this.header = this.makeHeaderContent();
-    this.body = this.makeBodyContent();
+    this.header = this.buildHeaderContent();
+    this.body = this.buildBodyContent();
   }
 
   /**
-   * 送信メッセージ用のデータを返す
+   * 送信メッセージを返す
    */
-  pushMessageContent() {
+  buildSendMessage(): Message {
     return {
-      type: this.type,
-      header: JSON.parse(JSON.stringify(this.header)),
-      body: JSON.parse(JSON.stringify(this.body)),
+      type: "flex",
+      altText: "サマリーメッセージ",
+      contents: {
+        type: this.type,
+        header: this.header,
+        body: this.body,
+      },
     };
   }
 
@@ -52,7 +57,7 @@ export class SummaryMessage {
   /**
    * flex メッセージのヘッダーの Box コンテントを作成して返す
    */
-  makeHeaderContent(): BoxContent {
+  buildHeaderContent(): FlexBox {
     const header = new BoxContent({ layout: "vertical", backgroundColor: "#1E90FF" });
 
     const headerContent = new TextContent({
@@ -63,31 +68,31 @@ export class SummaryMessage {
       size: "xl",
     });
 
-    header.addContent(headerContent);
+    header.addContent(headerContent.textContent);
 
-    return header;
+    return header.boxContent;
   }
 
   /**
    * flex メッセージのボディの Box コンテントを作成して返す
    */
-  makeBodyContent(): BoxContent {
+  buildBodyContent(): FlexBox {
     const bodyContent = new BoxContent({ layout: "vertical" });
 
-    bodyContent.addContent(this.makeSpendingContent());
-    bodyContent.addContent(new Separator("md"));
-    bodyContent.addContent(this.makePreviousMonthAmountComparison());
-    bodyContent.addContent(this.makeFixedCostContent());
-    bodyContent.addContent(new Separator("xl"));
-    bodyContent.addContent(this.makePieChartImageContent());
+    bodyContent.addContent(this.buildSpendingContent());
+    bodyContent.addContent(new SeparatorContent("md"));
+    bodyContent.addContent(this.buildPreviousMonthAmountComparison());
+    bodyContent.addContent(this.buildFixedCostContent().boxContent);
+    bodyContent.addContent(new SeparatorContent("xl"));
+    bodyContent.addContent(this.buildPieChartImageContent());
 
-    return bodyContent;
+    return bodyContent.boxContent;
   }
 
   /**
    * ボディの収支表示用の Box コンテントを作成して返す
    */
-  makeSpendingContent(): BoxContent {
+  buildSpendingContent(): FlexBox {
     const paymentHistorySheet = this.newPaymentHistorySheet(this.targetYear, this.targetMonth);
 
     const spendingContent = new BoxContent({ layout: "horizontal" });
@@ -109,10 +114,10 @@ export class SummaryMessage {
       decoration: "underline",
     });
 
-    spendingContent.addContent(spendingKey);
-    spendingContent.addContent(spendingValue);
+    spendingContent.addContent(spendingKey.textContent);
+    spendingContent.addContent(spendingValue.textContent);
 
-    return spendingContent;
+    return spendingContent.boxContent;
   }
 
   /**
@@ -133,10 +138,10 @@ export class SummaryMessage {
   /**
    * ボディの前月比の Box コンテントを作成して返す
    */
-  makePreviousMonthAmountComparison(): BoxContent {
+  buildPreviousMonthAmountComparison(): FlexBox {
     const amountComparisonContent = new BoxContent({ layout: "horizontal", margin: "md" });
 
-    const filler = new Filler();
+    const filler = new FillerContent();
 
     const momKey = new TextContent({
       text: "前月比",
@@ -160,10 +165,10 @@ export class SummaryMessage {
     });
 
     amountComparisonContent.addContent(filler);
-    amountComparisonContent.addContent(momKey);
-    amountComparisonContent.addContent(momValue);
+    amountComparisonContent.addContent(momKey.textContent);
+    amountComparisonContent.addContent(momValue.textContent);
 
-    return amountComparisonContent;
+    return amountComparisonContent.boxContent;
   }
 
   /**
@@ -172,7 +177,7 @@ export class SummaryMessage {
    * @param costName 固定費名
    * @param costValue 固定費金額
    */
-  makeFixedCostContentRecord(isFirstRecord: boolean, costName: string, costValue: number): BoxContent {
+  buildFixedCostContentRecord(isFirstRecord: boolean, costName: string, costValue: number): FlexBox {
     const fixedCostRecordContent = new BoxContent({
       layout: "horizontal",
       margin: "xs",
@@ -180,16 +185,16 @@ export class SummaryMessage {
     });
 
     if (isFirstRecord) {
-      const filler = new Filler();
+      const filler = new FillerContent();
       const fixedKeyContent = new TextContent({
         flex: 3,
         text: "固定費",
         size: "sm",
       });
       fixedCostRecordContent.addContent(filler);
-      fixedCostRecordContent.addContent(fixedKeyContent);
+      fixedCostRecordContent.addContent(fixedKeyContent.textContent);
     } else {
-      const filler = new Filler(4);
+      const filler = new FillerContent(4);
       fixedCostRecordContent.addContent(filler);
     }
 
@@ -205,16 +210,16 @@ export class SummaryMessage {
       align: "end",
     });
 
-    fixedCostRecordContent.addContent(nameContent);
-    fixedCostRecordContent.addContent(valueContent);
+    fixedCostRecordContent.addContent(nameContent.textContent);
+    fixedCostRecordContent.addContent(valueContent.textContent);
 
-    return fixedCostRecordContent;
+    return fixedCostRecordContent.boxContent;
   }
 
   /**
    * ボディの固定費の Box コンテントを作成して返す
    */
-  makeFixedCostContent(): BoxContent {
+  buildFixedCostContent(): BoxContent {
     const amountComparisonContent = new BoxContent({ layout: "vertical", margin: "sm" });
 
     for (const [index, record] of this.fixedCostSheet.scanRecord().entries()) {
@@ -231,7 +236,7 @@ export class SummaryMessage {
         throw new Error("Caught unexpected value!");
       }
 
-      amountComparisonContent.addContent(this.makeFixedCostContentRecord(isFirst, costName, costValue));
+      amountComparisonContent.addContent(this.buildFixedCostContentRecord(isFirst, costName, costValue));
     }
 
     return amountComparisonContent;
@@ -240,7 +245,7 @@ export class SummaryMessage {
   /**
    * ボディの円グラフの Image コンテントを作成して返す
    */
-  makePieChartImageContent(): ImageContent {
+  buildPieChartImageContent(): ImageContent {
     const fileName = `楽天カード決済履歴シート_${this.targetYear}`;
     const sheetName = `PieChartData-${this.targetMonth}月`;
 
