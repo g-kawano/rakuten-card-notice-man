@@ -1,6 +1,7 @@
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
-import { BoxContent, TextContent, Separator } from "@/libs/Line/02LineMessage";
+import { BoxContent, TextContent, SeparatorContent } from "@/libs/Line/02LineMessage";
 import { Setting } from "@/00Setting";
+import { Message, FlexBox, FlexBubble, FlexImage, FlexSeparator } from "@line/bot-sdk";
 
 const noticePaymentMessageSettings = new Setting();
 
@@ -8,9 +9,9 @@ const noticePaymentMessageSettings = new Setting();
  * 決済情報通知メッセージ用クラス
  */
 export class NoticePaymentHistoryMessage {
-  type: string;
-  header: BoxContent;
-  body?: BoxContent;
+  type: FlexBubble["type"];
+  header: FlexBox;
+  body?: FlexBox;
 
   constructor(paymentHistoryList: PaymentHistory[]) {
     this.type = "bubble";
@@ -19,21 +20,39 @@ export class NoticePaymentHistoryMessage {
   }
 
   /**
+   * 送信メッセージを返す
+   */
+  buildSendMessage(): Message {
+    return {
+      type: "flex",
+      altText: "カード利用のお知らせ",
+      contents: {
+        type: this.type,
+        header: this.header,
+        body: this.body,
+      },
+    };
+  }
+
+  /**
    * 通知メッセージのヘッダー部分を取得する
    * @returns Flex メッセージのヘッダーコンテント
    */
-  getHeader() {
+  getHeader(): FlexBox {
     const header = new BoxContent({ layout: "vertical", backgroundColor: "#E57F0FFF" });
+
     const headerContent = new TextContent({
       text: "カード利用のお知らせ",
+
       align: "center",
       color: "#FFFFFFFF",
       weight: "bold",
       size: "xl",
     });
-    header.addContent(headerContent);
 
-    return header;
+    header.addContent(headerContent.textContent);
+
+    return header.boxContent;
   }
 
   /**
@@ -41,19 +60,19 @@ export class NoticePaymentHistoryMessage {
    * @param paymentHistoryList 決済情報リスト
    * @returns 通知メッセージ本文を表示するメッセージオブジェクト
    */
-  getBody(paymentHistoryList: PaymentHistoryList) {
+  getBody(paymentHistoryList: PaymentHistoryList): FlexBox {
     const bodyContent = new BoxContent({ layout: "vertical" });
-    const himselfPaymentContent = this.createPaymentHistoryMessage(paymentHistoryList, "himself");
-    const familyPaymentContent = this.createPaymentHistoryMessage(paymentHistoryList, "family");
-    const allTotalAmountContent = this.createTotalAmountRecord(paymentHistoryList, true);
+    const himselfPaymentContent = this.buildPaymentHistoryMessage(paymentHistoryList, "himself");
+    const familyPaymentContent = this.buildPaymentHistoryMessage(paymentHistoryList, "family");
+    const allTotalAmountContent = this.buildTotalAmountRecord(paymentHistoryList, true);
 
-    bodyContent.addContent(himselfPaymentContent);
-    bodyContent.addContent(new BoxContent({ layout: "vertical", margin: "lg" }));
-    bodyContent.addContent(familyPaymentContent);
-    bodyContent.addContent(new Separator("xl"));
-    bodyContent.addContent(allTotalAmountContent);
+    bodyContent.addContent(himselfPaymentContent.boxContent);
+    bodyContent.addContent(new BoxContent({ layout: "vertical", margin: "lg" }).boxContent);
+    bodyContent.addContent(familyPaymentContent.boxContent);
+    bodyContent.addContent(new SeparatorContent("xl"));
+    bodyContent.addContent(allTotalAmountContent.boxContent);
 
-    return bodyContent;
+    return bodyContent.boxContent;
   }
 
   /**
@@ -62,17 +81,17 @@ export class NoticePaymentHistoryMessage {
    * @param userType himself or family
    * @returns 決済情報全体を表示するメッセージオブジェクト
    */
-  createPaymentHistoryMessage(paymentHistoryList: PaymentHistoryList, userType: "himself" | "family") {
+  buildPaymentHistoryMessage(paymentHistoryList: PaymentHistoryList, userType: "himself" | "family") {
     const paymentContent = new BoxContent({ layout: "vertical" });
 
-    const subjectContent = this.createSubjectMessage(userType);
+    const subjectContent = this.buildSubjectMessage(userType);
 
     // 利用者毎にフィルタリングする
     const paymentList = paymentHistoryList.extractPerUser(userType);
-    const paymentRecordsContent = this.createPaymentMessage(paymentList);
+    const paymentRecordsContent = this.buildPaymentMessage(paymentList);
 
-    paymentContent.addContent(subjectContent);
-    paymentContent.addContent(paymentRecordsContent);
+    paymentContent.addContent(subjectContent.boxContent);
+    paymentContent.addContent(paymentRecordsContent.boxContent);
 
     return paymentContent;
   }
@@ -82,7 +101,7 @@ export class NoticePaymentHistoryMessage {
    * @param userType himself or family
    * @returns 決済情報の件名を表示するメッセージオブジェクト
    */
-  createSubjectMessage(userType: "himself" | "family"): BoxContent {
+  buildSubjectMessage(userType: "himself" | "family"): BoxContent {
     let subject;
 
     const displayHimself =
@@ -101,8 +120,8 @@ export class NoticePaymentHistoryMessage {
         subject = new TextContent({ text: `利用者: ${displayFamily}`, weight: "bold" });
         break;
     }
-    const separator = new Separator("sm");
-    subjectContent.addContent(subject);
+    const separator = new SeparatorContent("sm");
+    subjectContent.addContent(subject.textContent);
     subjectContent.addContent(separator);
 
     return subjectContent;
@@ -113,16 +132,16 @@ export class NoticePaymentHistoryMessage {
    * @param paymentHistoryList
    * @returns 決済情報部分を表示するメッセージオブジェクト
    */
-  createPaymentMessage(paymentHistoryList: PaymentHistoryList): BoxContent {
+  buildPaymentMessage(paymentHistoryList: PaymentHistoryList): BoxContent {
     // メッセージ履歴レコード部分
     const paymentRecordsContent = new BoxContent({ layout: "vertical" });
     for (const paymentHistory of paymentHistoryList.paymentHistoryList) {
-      paymentRecordsContent.addContent(this.createPaymentMessageRecord(paymentHistory));
+      paymentRecordsContent.addContent(this.buildPaymentMessageRecord(paymentHistory).boxContent);
     }
 
     // 合計金額
-    const totalAmountRecordContent = this.createTotalAmountRecord(paymentHistoryList);
-    paymentRecordsContent.addContent(totalAmountRecordContent);
+    const totalAmountRecordContent = this.buildTotalAmountRecord(paymentHistoryList);
+    paymentRecordsContent.addContent(totalAmountRecordContent.boxContent);
 
     return paymentRecordsContent;
   }
@@ -132,7 +151,7 @@ export class NoticePaymentHistoryMessage {
    * @param paymentHistory
    * @returns 決済情報の1 レコードを表示するッセージオブジェクト
    */
-  createPaymentMessageRecord(paymentHistory: PaymentHistory) {
+  buildPaymentMessageRecord(paymentHistory: PaymentHistory) {
     const paymentRecordContent = new BoxContent({ layout: "horizontal", margin: "xs", justifyContent: "flex-start" });
 
     const date = new TextContent({
@@ -150,9 +169,9 @@ export class NoticePaymentHistoryMessage {
       margin: "none",
     });
 
-    paymentRecordContent.addContent(date);
-    paymentRecordContent.addContent(store);
-    paymentRecordContent.addContent(amount);
+    paymentRecordContent.addContent(date.textContent);
+    paymentRecordContent.addContent(store.textContent);
+    paymentRecordContent.addContent(amount.textContent);
 
     return paymentRecordContent;
   }
@@ -163,7 +182,7 @@ export class NoticePaymentHistoryMessage {
    * @param isAll true 全て、false 利用者毎
    * @returns 合計金額を表示するメッセージオブジェクト
    */
-  createTotalAmountRecord(paymentHistoryList: PaymentHistoryList, isAll: boolean = false) {
+  buildTotalAmountRecord(paymentHistoryList: PaymentHistoryList, isAll: boolean = false) {
     const totalAmountRecordContent = new BoxContent({
       layout: "horizontal",
       margin: "sm",
@@ -185,8 +204,8 @@ export class NoticePaymentHistoryMessage {
       flex: 2,
     });
 
-    totalAmountRecordContent.addContent(totalSubject);
-    totalAmountRecordContent.addContent(totalAmountContent);
+    totalAmountRecordContent.addContent(totalSubject.textContent);
+    totalAmountRecordContent.addContent(totalAmountContent.textContent);
 
     return totalAmountRecordContent;
   }
