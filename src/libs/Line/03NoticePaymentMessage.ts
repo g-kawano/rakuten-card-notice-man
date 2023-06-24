@@ -1,9 +1,7 @@
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
 import { BoxContent, TextContent, SeparatorContent } from "@/libs/Line/02LineMessage";
 import { Setting } from "@/00Setting";
-import { Message, FlexBox, FlexBubble, FlexImage, FlexSeparator } from "@line/bot-sdk";
-
-const noticePaymentMessageSettings = new Setting();
+import { Message, FlexBox, FlexBubble } from "@line/bot-sdk";
 
 /**
  * 決済情報通知メッセージ用クラス
@@ -12,8 +10,10 @@ export class NoticePaymentHistoryMessage {
   type: FlexBubble["type"];
   header: FlexBox;
   body?: FlexBox;
+  setting: Setting;
 
-  constructor(paymentHistoryList: PaymentHistory[]) {
+  constructor(paymentHistoryList: PaymentHistory[], setting: Setting = new Setting()) {
+    this.setting = setting
     this.type = "bubble";
     this.header = this.getHeader();
     this.body = this.getBody(new PaymentHistoryList(paymentHistoryList));
@@ -105,9 +105,9 @@ export class NoticePaymentHistoryMessage {
     let subject;
 
     const displayHimself =
-      noticePaymentMessageSettings.DISPLAY_HIMSELF !== null ? noticePaymentMessageSettings.DISPLAY_HIMSELF : "本人";
+      this.setting.DISPLAY_HIMSELF !== null ? this.setting.DISPLAY_HIMSELF : "本人";
     const displayFamily =
-      noticePaymentMessageSettings.DISPLAY_HIMSELF !== null ? noticePaymentMessageSettings.DISPLAY_FAMILY : "家族";
+      this.setting.DISPLAY_HIMSELF !== null ? this.setting.DISPLAY_FAMILY : "家族";
 
     // メッセージ件名部分
     const subjectContent = new BoxContent({ layout: "vertical" });
