@@ -13,7 +13,7 @@ export class NoticePaymentHistoryMessage {
   setting: Setting;
 
   constructor(paymentHistoryList: PaymentHistory[], setting: Setting = new Setting()) {
-    this.setting = setting
+    this.setting = setting;
     this.type = "bubble";
     this.header = this.getHeader();
     this.body = this.getBody(new PaymentHistoryList(paymentHistoryList));
@@ -29,8 +29,8 @@ export class NoticePaymentHistoryMessage {
       contents: {
         type: this.type,
         header: this.header,
-        body: this.body,
-      },
+        body: this.body
+      }
     };
   }
 
@@ -47,7 +47,7 @@ export class NoticePaymentHistoryMessage {
       align: "center",
       color: "#FFFFFFFF",
       weight: "bold",
-      size: "xl",
+      size: "xl"
     });
 
     header.addContent(headerContent.textContent);
@@ -66,11 +66,11 @@ export class NoticePaymentHistoryMessage {
     const familyPaymentContent = this.buildPaymentHistoryMessage(paymentHistoryList, "family");
     const allTotalAmountContent = this.buildTotalAmountRecord(paymentHistoryList, true);
 
-    bodyContent.addContent(himselfPaymentContent.boxContent);
+    bodyContent.addContent(himselfPaymentContent);
     bodyContent.addContent(new BoxContent({ layout: "vertical", margin: "lg" }).boxContent);
-    bodyContent.addContent(familyPaymentContent.boxContent);
+    bodyContent.addContent(familyPaymentContent);
     bodyContent.addContent(new SeparatorContent("xl"));
-    bodyContent.addContent(allTotalAmountContent.boxContent);
+    bodyContent.addContent(allTotalAmountContent);
 
     return bodyContent.boxContent;
   }
@@ -81,7 +81,7 @@ export class NoticePaymentHistoryMessage {
    * @param userType himself or family
    * @returns 決済情報全体を表示するメッセージオブジェクト
    */
-  buildPaymentHistoryMessage(paymentHistoryList: PaymentHistoryList, userType: "himself" | "family") {
+  buildPaymentHistoryMessage(paymentHistoryList: PaymentHistoryList, userType: "himself" | "family"): FlexBox {
     const paymentContent = new BoxContent({ layout: "vertical" });
 
     const subjectContent = this.buildSubjectMessage(userType);
@@ -90,10 +90,10 @@ export class NoticePaymentHistoryMessage {
     const paymentList = paymentHistoryList.extractPerUser(userType);
     const paymentRecordsContent = this.buildPaymentMessage(paymentList);
 
-    paymentContent.addContent(subjectContent.boxContent);
-    paymentContent.addContent(paymentRecordsContent.boxContent);
+    paymentContent.addContent(subjectContent);
+    paymentContent.addContent(paymentRecordsContent);
 
-    return paymentContent;
+    return paymentContent.boxContent;
   }
 
   /**
@@ -101,22 +101,19 @@ export class NoticePaymentHistoryMessage {
    * @param userType himself or family
    * @returns 決済情報の件名を表示するメッセージオブジェクト
    */
-  buildSubjectMessage(userType: "himself" | "family"): BoxContent {
+  buildSubjectMessage(userType: "himself" | "family"): FlexBox {
     let subject;
-
-    const displayHimself =
-      this.setting.DISPLAY_HIMSELF !== null ? this.setting.DISPLAY_HIMSELF : "本人";
-    const displayFamily =
-      this.setting.DISPLAY_HIMSELF !== null ? this.setting.DISPLAY_FAMILY : "家族";
 
     // メッセージ件名部分
     const subjectContent = new BoxContent({ layout: "vertical" });
 
     switch (userType) {
       case "himself":
+        const displayHimself = this.setting.DISPLAY_HIMSELF !== null ? this.setting.DISPLAY_HIMSELF : "本人";
         subject = new TextContent({ text: `利用者: ${displayHimself}`, weight: "bold" });
         break;
       case "family":
+        const displayFamily = this.setting.DISPLAY_FAMILY !== null ? this.setting.DISPLAY_FAMILY : "家族";
         subject = new TextContent({ text: `利用者: ${displayFamily}`, weight: "bold" });
         break;
     }
@@ -124,7 +121,7 @@ export class NoticePaymentHistoryMessage {
     subjectContent.addContent(subject.textContent);
     subjectContent.addContent(separator);
 
-    return subjectContent;
+    return subjectContent.boxContent;
   }
 
   /**
@@ -132,18 +129,18 @@ export class NoticePaymentHistoryMessage {
    * @param paymentHistoryList
    * @returns 決済情報部分を表示するメッセージオブジェクト
    */
-  buildPaymentMessage(paymentHistoryList: PaymentHistoryList): BoxContent {
+  buildPaymentMessage(paymentHistoryList: PaymentHistoryList): FlexBox {
     // メッセージ履歴レコード部分
     const paymentRecordsContent = new BoxContent({ layout: "vertical" });
     for (const paymentHistory of paymentHistoryList.paymentHistoryList) {
-      paymentRecordsContent.addContent(this.buildPaymentMessageRecord(paymentHistory).boxContent);
+      paymentRecordsContent.addContent(this.buildPaymentMessageRecord(paymentHistory));
     }
 
     // 合計金額
     const totalAmountRecordContent = this.buildTotalAmountRecord(paymentHistoryList);
-    paymentRecordsContent.addContent(totalAmountRecordContent.boxContent);
+    paymentRecordsContent.addContent(totalAmountRecordContent);
 
-    return paymentRecordsContent;
+    return paymentRecordsContent.boxContent;
   }
 
   /**
@@ -151,29 +148,29 @@ export class NoticePaymentHistoryMessage {
    * @param paymentHistory
    * @returns 決済情報の1 レコードを表示するッセージオブジェクト
    */
-  buildPaymentMessageRecord(paymentHistory: PaymentHistory) {
+  buildPaymentMessageRecord(paymentHistory: PaymentHistory): FlexBox {
     const paymentRecordContent = new BoxContent({ layout: "horizontal", margin: "xs", justifyContent: "flex-start" });
 
     const date = new TextContent({
       text: paymentHistory.date,
-      flex: 3,
+      flex: 3
     });
     const store = new TextContent({
       text: paymentHistory.store,
-      flex: 3,
+      flex: 3
     });
     const amount = new TextContent({
       text: paymentHistory.amount,
       align: "end",
       flex: 3,
-      margin: "none",
+      margin: "none"
     });
 
     paymentRecordContent.addContent(date.textContent);
     paymentRecordContent.addContent(store.textContent);
     paymentRecordContent.addContent(amount.textContent);
 
-    return paymentRecordContent;
+    return paymentRecordContent.boxContent;
   }
 
   /**
@@ -182,11 +179,11 @@ export class NoticePaymentHistoryMessage {
    * @param isAll true 全て、false 利用者毎
    * @returns 合計金額を表示するメッセージオブジェクト
    */
-  buildTotalAmountRecord(paymentHistoryList: PaymentHistoryList, isAll: boolean = false) {
+  buildTotalAmountRecord(paymentHistoryList: PaymentHistoryList, isAll: boolean = false): FlexBox {
     const totalAmountRecordContent = new BoxContent({
       layout: "horizontal",
       margin: "sm",
-      justifyContent: "flex-start",
+      justifyContent: "flex-start"
     });
 
     const totalAmount = paymentHistoryList.calcTotalAmount();
@@ -195,18 +192,18 @@ export class NoticePaymentHistoryMessage {
     const totalSubject = new TextContent({
       text: subjectText,
       align: "end",
-      flex: 4,
+      flex: 4
     });
 
     const totalAmountContent = new TextContent({
       text: `${totalAmount.toLocaleString()} 円`,
       align: "end",
-      flex: 2,
+      flex: 2
     });
 
     totalAmountRecordContent.addContent(totalSubject.textContent);
     totalAmountRecordContent.addContent(totalAmountContent.textContent);
 
-    return totalAmountRecordContent;
+    return totalAmountRecordContent.boxContent;
   }
 }
