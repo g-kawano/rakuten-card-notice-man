@@ -14,7 +14,7 @@ describe("Line class tests", () => {
     mockPushMessage = jest.fn();
     (Client as jest.MockedClass<typeof Client>).mockImplementation(() => {
       return {
-        pushMessage: mockPushMessage,
+        pushMessage: mockPushMessage
       } as unknown as Client; // Client に対する型アサーション
     });
 
