@@ -137,16 +137,8 @@ describe("NoticePaymentHistoryMessage", () => {
       const separatorContent = result.contents[1];
 
       expect(subjectTextContent).toMatchObject({
-        type: "text",
-        text: "利用者: 太郎",
-        wrap: true,
-        flex: undefined,
-        align: undefined,
-        color: undefined,
-        weight: "bold",
-        size: undefined,
-        margin: undefined,
-        decoration: undefined
+        ...textContentObject,
+        text: "利用者: 太郎"
       });
 
       expect(separatorContent).toMatchObject({ type: "separator", margin: "sm" });
@@ -161,16 +153,8 @@ describe("NoticePaymentHistoryMessage", () => {
       const separatorContent = result.contents[1];
 
       expect(subjectTextContent).toMatchObject({
-        type: "text",
-        text: "利用者: 花子",
-        wrap: true,
-        flex: undefined,
-        align: undefined,
-        color: undefined,
-        weight: "bold",
-        size: undefined,
-        margin: undefined,
-        decoration: undefined
+        ...textContentObject,
+        text: "利用者: 花子"
       });
 
       expect(separatorContent).toMatchObject({ type: "separator", margin: "sm" });
