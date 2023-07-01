@@ -2,30 +2,33 @@ import { BoxContent, TextContent, ImageContent, SeparatorContent, FillerContent 
 import { PaymentHistorySheet } from "../SpreadSheet/02PaymentHistorySheet";
 import { FixedCostSheet } from "../SpreadSheet/05FixedCostSheet";
 import { PieChartSheet } from "../SpreadSheet/04PieChartSheet";
-import { Setting } from "@/00Setting";
-import { FlexBubble, FlexBox, Message } from "@line/bot-sdk";
-
-const summaryMessagesSettings = new Setting();
+import { FlexBox, Message } from "@line/bot-sdk";
 
 /**
  * サマリーメッセージ用クラス
  */
 export class SummaryMessage {
-  type: FlexBubble["type"];
-  header: FlexBox;
-  body?: FlexBox;
   targetYear: string;
   targetMonth: string;
   fixedCostSheet: FixedCostSheet;
+  paymentHistorySheet: PaymentHistorySheet;
+  previousPaymentHistorySheet: PaymentHistorySheet;
+  pieChartSheet: PieChartSheet;
 
-  constructor(targetYear: string, targetMonth: string) {
-    this.type = "bubble";
+  constructor(
+    targetYear: string,
+    targetMonth: string,
+    fixedCostSheet: FixedCostSheet,
+    paymentHistorySheet: PaymentHistorySheet,
+    previousPaymentHistorySheet: PaymentHistorySheet,
+    pieChartSheet: PieChartSheet
+  ) {
     this.targetYear = targetYear;
     this.targetMonth = targetMonth;
-    this.fixedCostSheet = new FixedCostSheet(summaryMessagesSettings.MASTER_SPREAD_SHEET_FILE, "M_Fixed_cost");
-
-    this.header = this.buildHeaderContent();
-    this.body = this.buildBodyContent();
+    this.fixedCostSheet = fixedCostSheet;
+    this.paymentHistorySheet = paymentHistorySheet;
+    this.previousPaymentHistorySheet = previousPaymentHistorySheet;
+    this.pieChartSheet = pieChartSheet;
   }
 
   /**
@@ -36,22 +39,11 @@ export class SummaryMessage {
       type: "flex",
       altText: "サマリーメッセージ",
       contents: {
-        type: this.type,
-        header: this.header,
-        body: this.body,
-      },
+        type: "bubble",
+        header: this.buildHeaderContent(),
+        body: this.buildBodyContent()
+      }
     };
-  }
-
-  /**
-   * 指定した年、月の決済履歴シートクラスをインスタンス化して返す
-   * @param targetYear 対象年
-   * @param targetMonth 対象月
-   */
-  private newPaymentHistorySheet(targetYear: string, targetMonth: string): PaymentHistorySheet {
-    const fileName = `楽天カード決済履歴シート_${targetYear}`;
-    const sheetName = `${targetMonth}月`;
-    return new PaymentHistorySheet(fileName, sheetName);
   }
 
   /**
@@ -65,7 +57,7 @@ export class SummaryMessage {
       align: "center",
       color: "#FFFFFFFF",
       weight: "bold",
-      size: "xl",
+      size: "xl"
     });
 
     header.addContent(headerContent.textContent);
@@ -82,7 +74,7 @@ export class SummaryMessage {
     bodyContent.addContent(this.buildSpendingContent());
     bodyContent.addContent(new SeparatorContent("md"));
     bodyContent.addContent(this.buildPreviousMonthAmountComparison());
-    bodyContent.addContent(this.buildFixedCostContent().boxContent);
+    bodyContent.addContent(this.buildFixedCostContent());
     bodyContent.addContent(new SeparatorContent("xl"));
     bodyContent.addContent(this.buildPieChartImageContent());
 
@@ -93,25 +85,24 @@ export class SummaryMessage {
    * ボディの収支表示用の Box コンテントを作成して返す
    */
   buildSpendingContent(): FlexBox {
-    const paymentHistorySheet = this.newPaymentHistorySheet(this.targetYear, this.targetMonth);
-
     const spendingContent = new BoxContent({ layout: "horizontal" });
 
     const spendingKey = new TextContent({
       text: "支出：",
       weight: "bold",
       size: "md",
-      flex: 4,
+      flex: 4
     });
 
-    const totalAmount = paymentHistorySheet.sumColumn(2, 4) + this.fixedCostSheet.sumColumn(2, 3);
+    const totalAmount = this.paymentHistorySheet.sumColumn(2, 4) + this.fixedCostSheet.sumColumn(2, 3);
+
     const spendingValue = new TextContent({
       text: `¥ ${totalAmount.toLocaleString()}`,
       align: "end",
       flex: 5,
       size: "md",
       weight: "bold",
-      decoration: "underline",
+      decoration: "underline"
     });
 
     spendingContent.addContent(spendingKey.textContent);
@@ -125,14 +116,7 @@ export class SummaryMessage {
    * 当月の合計金額 - 前月の合計金額
    */
   calcPreviousMonthAmountComparison(): number {
-    const month = Number(this.targetMonth);
-    const previousMonth = month - 1 === 0 ? 12 : month - 1;
-
-    const targetSheet = this.newPaymentHistorySheet(this.targetYear, this.targetMonth);
-
-    const previousSheet = this.newPaymentHistorySheet(this.targetYear, String(previousMonth));
-
-    return targetSheet.sumColumn(2, 4) - previousSheet.sumColumn(2, 4);
+    return this.paymentHistorySheet.sumColumn(2, 4) - this.previousPaymentHistorySheet.sumColumn(2, 4);
   }
 
   /**
@@ -147,7 +131,7 @@ export class SummaryMessage {
       text: "前月比",
       weight: "bold",
       size: "md",
-      flex: 4,
+      flex: 4
     });
 
     const amountComparison = this.calcPreviousMonthAmountComparison();
@@ -161,7 +145,7 @@ export class SummaryMessage {
       flex: 5,
       size: "md",
       weight: "bold",
-      color: color,
+      color: color
     });
 
     amountComparisonContent.addContent(filler);
@@ -181,7 +165,7 @@ export class SummaryMessage {
     const fixedCostRecordContent = new BoxContent({
       layout: "horizontal",
       margin: "xs",
-      justifyContent: "flex-start",
+      justifyContent: "flex-start"
     });
 
     if (isFirstRecord) {
@@ -189,7 +173,7 @@ export class SummaryMessage {
       const fixedKeyContent = new TextContent({
         flex: 3,
         text: "固定費",
-        size: "sm",
+        size: "sm"
       });
       fixedCostRecordContent.addContent(filler);
       fixedCostRecordContent.addContent(fixedKeyContent.textContent);
@@ -201,13 +185,13 @@ export class SummaryMessage {
     const nameContent = new TextContent({
       text: costName,
       flex: 3,
-      size: "sm",
+      size: "sm"
     });
 
     const valueContent = new TextContent({
       text: `¥ ${costValue.toLocaleString()}`,
       flex: 3,
-      align: "end",
+      align: "end"
     });
 
     fixedCostRecordContent.addContent(nameContent.textContent);
@@ -219,7 +203,7 @@ export class SummaryMessage {
   /**
    * ボディの固定費の Box コンテントを作成して返す
    */
-  buildFixedCostContent(): BoxContent {
+  buildFixedCostContent(): FlexBox {
     const amountComparisonContent = new BoxContent({ layout: "vertical", margin: "sm" });
 
     for (const [index, record] of this.fixedCostSheet.scanRecord().entries()) {
@@ -229,36 +213,31 @@ export class SummaryMessage {
       const costValue = record[1];
 
       if (typeof costName !== "string") {
-        throw new Error("Caught unexpected value!");
+        throw new Error("Cost name is not string!");
       }
 
       if (typeof costValue !== "number") {
-        throw new Error("Caught unexpected value!");
+        throw new Error("Cost value is not number!");
       }
 
       amountComparisonContent.addContent(this.buildFixedCostContentRecord(isFirst, costName, costValue));
     }
 
-    return amountComparisonContent;
+    return amountComparisonContent.boxContent;
   }
 
   /**
    * ボディの円グラフの Image コンテントを作成して返す
    */
   buildPieChartImageContent(): ImageContent {
-    const fileName = `楽天カード決済履歴シート_${this.targetYear}`;
-    const sheetName = `PieChartData-${this.targetMonth}月`;
-
-    const pieChartSheet = new PieChartSheet(fileName, sheetName);
-
     const chartFileName = `PieChart-${this.targetMonth}`;
-    pieChartSheet.uploadChart(chartFileName);
-    const imageUrl = pieChartSheet.downloadChartUrl(chartFileName);
+    this.pieChartSheet.uploadChart(chartFileName);
+    const imageUrl = this.pieChartSheet.downloadChartUrl(chartFileName);
 
     const pieChartImageContent = new ImageContent({
       url: imageUrl,
       size: "full",
-      align: "center",
+      align: "center"
     });
 
     return pieChartImageContent;

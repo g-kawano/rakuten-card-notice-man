@@ -5,6 +5,8 @@ import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
 import { Line } from "@/libs/Line/01Line";
 import { PaymentHistorySheet } from "@/libs/SpreadSheet/02PaymentHistorySheet";
 import { Setting } from "./00Setting";
+import { FixedCostSheet } from "./libs/SpreadSheet/05FixedCostSheet";
+import { PieChartSheet } from "./libs/SpreadSheet/04PieChartSheet";
 
 const settings = new Setting();
 
@@ -116,8 +118,25 @@ const sendSummaryMessage = (today: Date) => {
   const lineClient = new Line();
   const targetYear = today.getFullYear().toString();
   const targetMonth = today.getMonth().toString();
+  const fileName = `楽天カード決済履歴シート_${targetYear}`;
+  const sheetName = `PieChartData-${targetMonth}月`;
 
-  const summaryMessage = new SummaryMessage(targetYear, targetMonth);
+  //FIXME: ほんとは date-fns を使いたい（GAS 上で外部モジュール使うのは一手間必要なので今回は諦めてる）
+  const previousMonth = Number(targetMonth) - 1 === 0 ? 12 : Number(targetMonth) - 1;
+
+  const paymentHistorySheet = new PaymentHistorySheet(targetYear, targetMonth);
+  const previousPaymentHistorySheet = new PaymentHistorySheet(targetYear, String(previousMonth));
+  const fixedCostSheet = new FixedCostSheet(settings.MASTER_SPREAD_SHEET_FILE, "M_Fixed_cost");
+  const pieChartSheet = new PieChartSheet(fileName, sheetName);
+
+  const summaryMessage = new SummaryMessage(
+    targetYear,
+    targetMonth,
+    fixedCostSheet,
+    paymentHistorySheet,
+    previousPaymentHistorySheet,
+    pieChartSheet
+  );
 
   lineClient.pushMessage(summaryMessage.buildSendMessage());
 };
