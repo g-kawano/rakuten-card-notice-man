@@ -2,16 +2,18 @@ import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
 import { Drive } from "@/libs/Drive/01Drive";
 import { Setting } from "@/00Setting";
 
-const pieChartSheetSettings = new Setting();
-
 /**
  * 円グラフシート操作用クラス
  */
 export class PieChartSheet extends SpreadSheet {
-  sheetName: string;
-  constructor(fileName: string, sheetName: string) {
-    super(fileName, sheetName);
-    this.sheetName = sheetName;
+  setting: Setting;
+  constructor(
+    spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
+    sheet: GoogleAppsScript.Spreadsheet.Sheet,
+    setting = new Setting()
+  ) {
+    super(spreadSheet, sheet);
+    this.setting = setting;
   }
 
   /**
@@ -29,7 +31,7 @@ export class PieChartSheet extends SpreadSheet {
   uploadChart(fileName: string): void {
     const drive = new Drive();
     const graphImg = this.getChartImg();
-    const folder = drive.findFolderByName(pieChartSheetSettings.DRIVE_FOLDER_NAME);
+    const folder = drive.findFolderByName(this.setting.DRIVE_FOLDER_NAME);
     folder.createFile(graphImg.setName(fileName));
   }
 

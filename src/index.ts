@@ -7,6 +7,7 @@ import { PaymentHistorySheet } from "@/libs/SpreadSheet/02PaymentHistorySheet";
 import { Setting } from "./00Setting";
 import { FixedCostSheet } from "./libs/SpreadSheet/05FixedCostSheet";
 import { PieChartSheet } from "./libs/SpreadSheet/04PieChartSheet";
+import { SpreadSheet } from "./libs/SpreadSheet/01SpreadSheet";
 
 const settings = new Setting();
 
@@ -76,9 +77,13 @@ const savePaymentHistorySheet = (paymentHistoryList: PaymentHistory[]) => {
   for (const record of paymentRecords.paymentHistoryList) {
     const fileName = `楽天カード決済履歴シート_${record.getYear()}`;
     const sheetName = `${record.getMonth()}月`;
-    const sheet = new PaymentHistorySheet(fileName, sheetName);
 
-    sheet.addPaymentsRecord(record);
+    const spreadSheet = SpreadSheet.getSpreadsheet(fileName);
+    const sheet = SpreadSheet.getSpreadSheetSheet(spreadSheet, sheetName);
+
+    const paymentHistorySheet = new PaymentHistorySheet(SpreadSheet.getSpreadsheet(fileName), sheet);
+
+    paymentHistorySheet.addPaymentsRecord(record);
   }
 };
 
@@ -104,10 +109,14 @@ const createChart = (today: Date) => {
 
   const fileName = `楽天カード決済履歴シート_${targetYear}`;
   const sheetName = `${targetMonth}月`;
-  const sheet = new PaymentHistorySheet(fileName, sheetName);
 
-  sheet.createBarChart(targetMonth);
-  sheet.createPieChart(targetMonth);
+  const spreadSheet = SpreadSheet.getSpreadsheet(fileName);
+  const sheet = SpreadSheet.getSpreadSheetSheet(spreadSheet, sheetName);
+
+  const paymentHistorySheet = new PaymentHistorySheet(spreadSheet, sheet);
+
+  paymentHistorySheet.createBarChart(targetMonth);
+  paymentHistorySheet.createPieChart(targetMonth);
 };
 
 /**
@@ -119,15 +128,24 @@ const sendSummaryMessage = (today: Date) => {
   const targetYear = today.getFullYear().toString();
   const targetMonth = today.getMonth().toString();
   const fileName = `楽天カード決済履歴シート_${targetYear}`;
-  const sheetName = `PieChartData-${targetMonth}月`;
+  const pieSheetName = `PieChartData-${targetMonth}月`;
 
   //FIXME: ほんとは date-fns を使いたい（GAS 上で外部モジュール使うのは一手間必要なので今回は諦めてる）
   const previousMonth = Number(targetMonth) - 1 === 0 ? 12 : Number(targetMonth) - 1;
 
-  const paymentHistorySheet = new PaymentHistorySheet(targetYear, targetMonth);
-  const previousPaymentHistorySheet = new PaymentHistorySheet(targetYear, String(previousMonth));
-  const fixedCostSheet = new FixedCostSheet(settings.MASTER_SPREAD_SHEET_FILE, "M_Fixed_cost");
-  const pieChartSheet = new PieChartSheet(fileName, sheetName);
+  const spreadSheet = SpreadSheet.getSpreadsheet(fileName);
+  const sheet = SpreadSheet.getSpreadSheetSheet(spreadSheet, `${targetMonth}月`);
+  const previousSheet = SpreadSheet.getSpreadSheetSheet(spreadSheet, `${previousMonth}月`);
+
+  const pieSheet = SpreadSheet.getSpreadSheetSheet(spreadSheet, pieSheetName);
+
+  const masterSpreadSheet = SpreadSheet.getSpreadsheet(settings.MASTER_SPREAD_SHEET_FILE);
+  const fixedSheet = SpreadSheet.getSpreadSheetSheet(masterSpreadSheet, "M_Fixed_cost");
+
+  const paymentHistorySheet = new PaymentHistorySheet(spreadSheet, sheet);
+  const previousPaymentHistorySheet = new PaymentHistorySheet(spreadSheet, previousSheet);
+  const fixedCostSheet = new FixedCostSheet(masterSpreadSheet, fixedSheet);
+  const pieChartSheet = new PieChartSheet(spreadSheet, pieSheet);
 
   const summaryMessage = new SummaryMessage(
     targetYear,

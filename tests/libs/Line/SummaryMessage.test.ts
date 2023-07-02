@@ -23,20 +23,20 @@ describe("SummaryMessage", () => {
     const targetYear = "2023";
     const targetMonth = "5";
 
+    const dummySheetFile = "dummy" as unknown as GoogleAppsScript.Spreadsheet.Spreadsheet;
+    const dummySheet = "dummy" as unknown as GoogleAppsScript.Spreadsheet.Sheet;
+
     setting = new Setting() as jest.Mocked<Setting>;
-    paymentHistorySheet = new PaymentHistorySheet(
-      "dummyFileName",
-      "dummySheetName"
-    ) as jest.Mocked<PaymentHistorySheet>;
+    paymentHistorySheet = new PaymentHistorySheet(dummySheetFile, dummySheet) as jest.Mocked<PaymentHistorySheet>;
 
     previousPaymentHistorySheet = new PaymentHistorySheet(
-      "dummyFileName",
-      "dummySheetName"
+      dummySheetFile,
+      dummySheet
     ) as jest.Mocked<PaymentHistorySheet>;
 
-    fixedCostSheet = new FixedCostSheet("dummyFileName", "dummySheetName") as jest.Mocked<FixedCostSheet>;
+    fixedCostSheet = new FixedCostSheet(dummySheetFile, dummySheet) as jest.Mocked<FixedCostSheet>;
 
-    pieChartSheet = new PieChartSheet("dummyFileName", "dummySheetName") as jest.Mocked<PieChartSheet>;
+    pieChartSheet = new PieChartSheet(dummySheetFile, dummySheet) as jest.Mocked<PieChartSheet>;
 
     setting.MASTER_SPREAD_SHEET_FILE = "dummy";
 

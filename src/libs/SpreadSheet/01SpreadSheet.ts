@@ -1,13 +1,15 @@
 /**
  * スプレットシート操作用クラス
+ * @property spreadSheet  スプしレッドシートファイルインスタンス
+ * @property sheet  スプレッドシート内の１シートインスタンス
  */
 export class SpreadSheet {
   spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
   protected sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
-  constructor(fileName: string, sheetName: string) {
-    this.spreadSheet = this.getSpreadsheet(fileName);
-    this.sheet = this.getSpreadSheetSheet(this.spreadSheet, sheetName);
+  constructor(spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet, sheet: GoogleAppsScript.Spreadsheet.Sheet) {
+    this.spreadSheet = spreadSheet;
+    this.sheet = sheet;
   }
 
   /**
@@ -16,7 +18,7 @@ export class SpreadSheet {
    * @param fileName  対象spreadSheet ファイル名
    * @returns
    */
-  getSpreadsheet(fileName: string): GoogleAppsScript.Spreadsheet.Spreadsheet {
+  static getSpreadsheet(fileName: string): GoogleAppsScript.Spreadsheet.Spreadsheet {
     const files = DriveApp.searchFiles("title contains " + "'" + fileName + "'");
     let spreadSheet;
     if (files.hasNext()) {
@@ -36,7 +38,7 @@ export class SpreadSheet {
    * @param targetSheetName 対象の spreadSheet のシート名
    * @returns
    */
-  getSpreadSheetSheet(
+  static getSpreadSheetSheet(
     spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
     targetSheetName: string
   ): GoogleAppsScript.Spreadsheet.Sheet {

@@ -4,23 +4,28 @@ import { StoreCategorySheet } from "@/libs/SpreadSheet/03StoreCategorySheet";
 import { Setting } from "@/00Setting";
 
 type AggregatedDataPerDate = {
-  [datestring: string]: number;
+  [dateString: string]: number;
 };
 
 type AggregatedDataPerCategory = {
   [categoryName: string]: number;
 };
 
-const paymentHistorySheetSettings = new Setting();
-
 /**
  * 決済履歴スプレットシート操作用クラス
  */
 export class PaymentHistorySheet extends SpreadSheet {
   header: String[] = ["日時", "使用店舗", "利用者", "利用金額", "カテゴリー"];
+  setting: Setting;
 
-  constructor(fileName: string, sheetName: string) {
-    super(fileName, sheetName);
+  constructor(
+    spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
+    sheet: GoogleAppsScript.Spreadsheet.Sheet,
+    setting = new Setting()
+  ) {
+    super(spreadSheet, sheet);
+    this.setting = setting;
+
     //sheet が 0 行の場合は、ヘッダーを追加する
     const countRow = this.sheet.getDataRange().getNumRows();
     // スプレッドシートはデフォルトで 1 行目が含まれている
@@ -34,12 +39,14 @@ export class PaymentHistorySheet extends SpreadSheet {
    * @param records 追加するレコード
    */
   addPaymentsRecord(record: PaymentHistory): void {
+    const categorySheetName = "JOIN_store_category";
+
+    const spreadSheet = SpreadSheet.getSpreadsheet(this.setting.MASTER_SPREAD_SHEET_FILE);
+    const sheet = SpreadSheet.getSpreadSheetSheet(spreadSheet, categorySheetName);
+
     // 使用店舗のカテゴリーを取得する
-    const storeCategory = new StoreCategorySheet(
-      paymentHistorySheetSettings.MASTER_SPREAD_SHEET_FILE,
-      "JOIN_store_category"
-    );
-    const category = storeCategory.searchCategoryByStoreName(record.store);
+    const storeCategory = new StoreCategorySheet(spreadSheet, sheet);
+    const category = storeCategory.searchCategoryByStoreName(categorySheetName, record.store);
 
     //TODO: カテゴリーを取得できなかった場合は、M_store シートにレコードを追加する
     // 実際は以下のケースが考えられるが、現状は 1. のみを考慮する
@@ -80,7 +87,7 @@ export class PaymentHistorySheet extends SpreadSheet {
     // 日時と利用金額のデータを結合
     const chartDataValues: [string, string][] = Object.entries(aggregatedData).map(([date, amount]) => [
       Utilities.formatDate(new Date(date), "JST", "MM/dd"),
-      amount.toLocaleString(),
+      amount.toLocaleString()
     ]);
 
     // データを日付の昇順でソート
@@ -89,7 +96,7 @@ export class PaymentHistorySheet extends SpreadSheet {
     });
 
     // 結合されたデータを新しいシートにコピー
-    const chartDataSheet = super.getSpreadSheetSheet(this.spreadSheet, `BarChartData-${targetMonth}月`);
+    const chartDataSheet = SpreadSheet.getSpreadSheetSheet(this.spreadSheet, `BarChartData-${targetMonth}月`);
     chartDataSheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
 
     // グラフを作成
@@ -104,8 +111,8 @@ export class PaymentHistorySheet extends SpreadSheet {
         title: "利用金額",
         logScale: true,
         gridlines: {
-          count: 50,
-        },
+          count: 50
+        }
       })
       .setOption("hAxis.format", "MM/dd") // 横軸の日付フォーマットを MM/dd に設定
       .setOption("hAxis.slantedText", true) // 斜めのテキストを有効にする
@@ -147,7 +154,7 @@ export class PaymentHistorySheet extends SpreadSheet {
     });
 
     // 結合されたデータを新しいシートにコピー
-    const chartDataSheet = super.getSpreadSheetSheet(this.spreadSheet, `PieChartData-${targetMonth}月`);
+    const chartDataSheet = SpreadSheet.getSpreadSheetSheet(this.spreadSheet, `PieChartData-${targetMonth}月`);
     chartDataSheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
 
     // グラフを作成
