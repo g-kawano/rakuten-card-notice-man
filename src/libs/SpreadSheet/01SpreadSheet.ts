@@ -4,7 +4,7 @@
  * @property sheet  スプレッドシート内の１シートインスタンス
  */
 export class SpreadSheet {
-  spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
+  protected spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
   protected sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
   constructor(spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet, sheet: GoogleAppsScript.Spreadsheet.Sheet) {
@@ -16,16 +16,22 @@ export class SpreadSheet {
    * 対象の spreadSheet の操作クラスを取得する
    * 既に作成されている場合はファイル ID で読み込み、ない場合は新規作成し、その結果を返す
    * @param fileName  対象spreadSheet ファイル名
+   * @param DriveApp GAS の ドライブ操作ライブラリ
+   * @param spreadSheetApp GAS の シート操作ライブラリ
    * @returns
    */
-  static getSpreadsheet(fileName: string): GoogleAppsScript.Spreadsheet.Spreadsheet {
-    const files = DriveApp.searchFiles("title contains " + "'" + fileName + "'");
+  static getSpreadsheet(
+    fileName: string,
+    driveApp: GoogleAppsScript.Drive.DriveApp = DriveApp,
+    spreadSheetApp: GoogleAppsScript.Spreadsheet.SpreadsheetApp = SpreadsheetApp
+  ): GoogleAppsScript.Spreadsheet.Spreadsheet {
+    const files = driveApp.searchFiles("title contains " + "'" + fileName + "'");
     let spreadSheet;
     if (files.hasNext()) {
       const fileId = files.next().getId();
-      spreadSheet = SpreadsheetApp.openById(fileId);
+      spreadSheet = spreadSheetApp.openById(fileId);
     } else {
-      spreadSheet = SpreadsheetApp.create(fileName);
+      spreadSheet = spreadSheetApp.create(fileName);
     }
 
     return spreadSheet;
@@ -42,7 +48,7 @@ export class SpreadSheet {
     spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
     targetSheetName: string
   ): GoogleAppsScript.Spreadsheet.Sheet {
-    let activeSheet;
+    let activeSheet: GoogleAppsScript.Spreadsheet.Sheet;
     // 当月のシートがない場合は作成する
     const targetSheet = spreadSheet.getSheetByName(targetSheetName);
     if (!targetSheet) {
@@ -59,17 +65,17 @@ export class SpreadSheet {
    * @param records 追加するレコード
    */
   addRecords<T>(records: T[][]): void {
+    const values = [...this.sheet.getDataRange().getValues()];
+
     for (const record of records) {
-      const values = this.sheet.getDataRange().getValues();
-
       values.push(record);
-
-      const column = this.sheet.getDataRange().getLastColumn();
-      const row = values.length;
-
-      //書き出し
-      this.sheet.getRange(1, 1, row, column).setValues(values);
     }
+
+    const column = this.sheet.getDataRange().getLastColumn();
+    const row = values.length;
+
+    //書き出し
+    this.sheet.getRange(1, 1, row, column).setValues(values);
   }
 
   /**
