@@ -4,11 +4,9 @@
  * @property sheet  スプレッドシート内の１シートインスタンス
  */
 export class SpreadSheet {
-  protected spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
-  protected sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
-  constructor(spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet, sheet: GoogleAppsScript.Spreadsheet.Sheet) {
-    this.spreadSheet = spreadSheet;
+  constructor(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
     this.sheet = sheet;
   }
 

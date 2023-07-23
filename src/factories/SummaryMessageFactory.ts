@@ -1,5 +1,6 @@
 import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
 import { PaymentHistorySheet } from "@/libs/SpreadSheet/02PaymentHistorySheet";
+import { PaymentHistorySheetFactory, PaymentHistoryDependencies } from "@/factories/PaymentHistorySheetFactory";
 import { PieChartSheet } from "@/libs/SpreadSheet/04PieChartSheet";
 import { FixedCostSheet } from "@/libs/SpreadSheet/05FixedCostSheet";
 import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
@@ -34,14 +35,6 @@ export class Dependencies {
       ? SpreadSheet.getSpreadsheet(paymentHistorySheetFileName)
       : SpreadSheet.getSpreadsheet(`楽天カード決済履歴シート_${this.targetYear}`);
 
-    const targetPaymentHistorySheet = SpreadSheet.getSpreadSheetSheet(
-      paymentHistorySpreadSheet,
-      `${this.targetMonth}月`
-    );
-    const targetPreviousPaymentHistorySheet = SpreadSheet.getSpreadSheetSheet(
-      paymentHistorySpreadSheet,
-      `${previousMonth}月`
-    );
     const targetFixedSheet = SpreadSheet.getSpreadSheetSheet(masterSpreadSheet, "M_Fixed_cost");
     const targetPieChartSheet = SpreadSheet.getSpreadSheetSheet(
       paymentHistorySpreadSheet,
@@ -49,11 +42,14 @@ export class Dependencies {
     );
 
     this.fixedCostSheet = new FixedCostSheet(masterSpreadSheet, targetFixedSheet);
-    this.paymentHistorySheet = new PaymentHistorySheet(paymentHistorySpreadSheet, targetPaymentHistorySheet);
-    this.previousPaymentHistorySheet = new PaymentHistorySheet(
-      paymentHistorySpreadSheet,
-      targetPreviousPaymentHistorySheet
+    this.paymentHistorySheet = PaymentHistorySheetFactory.create();
+    const paymentDeps = new PaymentHistoryDependencies(
+      undefined,
+      undefined,
+      paymentHistorySheetFileName,
+      `${previousMonth}月`
     );
+    this.previousPaymentHistorySheet = PaymentHistorySheetFactory.create(paymentDeps);
 
     this.pieChartSheet = new PieChartSheet(paymentHistorySpreadSheet, targetPieChartSheet);
   }

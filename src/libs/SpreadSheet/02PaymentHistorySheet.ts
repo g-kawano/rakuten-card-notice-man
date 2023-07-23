@@ -2,6 +2,7 @@ import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
 import { PaymentHistory } from "@/libs/01PaymentHistory";
 import { StoreCategorySheet } from "@/libs/SpreadSheet/03StoreCategorySheet";
 import { Setting } from "@/00Setting";
+import { SpreadSheetFactory } from "@/factories/SpreadSheetFactory";
 
 type AggregatedDataPerDate = {
   [dateString: string]: number;
@@ -18,19 +19,15 @@ export class PaymentHistorySheet extends SpreadSheet {
   header: String[] = ["日時", "使用店舗", "利用者", "利用金額", "カテゴリー"];
   setting: Setting;
 
-  constructor(
-    spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
-    sheet: GoogleAppsScript.Spreadsheet.Sheet,
-    setting = new Setting()
-  ) {
-    super(spreadSheet, sheet);
+  constructor(sheet: GoogleAppsScript.Spreadsheet.Sheet, setting = new Setting()) {
+    super(sheet);
     this.setting = setting;
 
     //sheet が 0 行の場合は、ヘッダーを追加する
-    const countRow = this.sheet.getDataRange().getNumRows();
+    const countRow = sheet.getDataRange().getNumRows();
     // スプレッドシートはデフォルトで 1 行目が含まれている
     if (countRow === 1) {
-      this.sheet.appendRow(this.header);
+      sheet.appendRow(this.header);
     }
   }
 
@@ -95,15 +92,18 @@ export class PaymentHistorySheet extends SpreadSheet {
       return new Date(a[0]).getTime() - new Date(b[0]).getTime();
     });
 
-    // 結合されたデータを新しいシートにコピー
-    const chartDataSheet = SpreadSheet.getSpreadSheetSheet(this.spreadSheet, `BarChartData-${targetMonth}月`);
-    chartDataSheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
+    // FIXME: 実行年はメールの受信日から設定したい
+    const chartDataSheet = SpreadSheetFactory.createFromFileName(
+      `楽天カード決済履歴シート_${new Date().getFullYear().toString()}`,
+      `BarChartData-${targetMonth}月`
+    );
+    chartDataSheet.sheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
 
     // グラフを作成
-    var chart = chartDataSheet
+    var chart = chartDataSheet.sheet
       .newChart()
       .setChartType(Charts.ChartType.COLUMN)
-      .addRange(chartDataSheet.getRange(1, 1, chartDataValues.length, 2))
+      .addRange(chartDataSheet.sheet.getRange(1, 1, chartDataValues.length, 2))
       .setPosition(2, 4, 0, 0)
       .setOption("title", `${targetMonth}月の利用日別金額`)
       .setOption("hAxis.title", "日時")
@@ -121,7 +121,7 @@ export class PaymentHistorySheet extends SpreadSheet {
       .build();
 
     // グラフをシートに挿入
-    chartDataSheet.insertChart(chart);
+    chartDataSheet.sheet.insertChart(chart);
   }
 
   /**
@@ -154,14 +154,18 @@ export class PaymentHistorySheet extends SpreadSheet {
     });
 
     // 結合されたデータを新しいシートにコピー
-    const chartDataSheet = SpreadSheet.getSpreadSheetSheet(this.spreadSheet, `PieChartData-${targetMonth}月`);
-    chartDataSheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
+    // FIXME: 実行年はメールの受信日から設定したい
+    const chartDataSheet = SpreadSheetFactory.createFromFileName(
+      `楽天カード決済履歴シート_${new Date().getFullYear().toString()}`,
+      `PieChartData-${targetMonth}月`
+    );
+    chartDataSheet.sheet.getRange(1, 1, chartDataValues.length, 2).setValues(chartDataValues);
 
     // グラフを作成
-    const chart = chartDataSheet
+    const chart = chartDataSheet.sheet
       .newChart()
       .setChartType(Charts.ChartType.PIE)
-      .addRange(chartDataSheet.getRange(1, 1, chartDataValues.length, 2))
+      .addRange(chartDataSheet.sheet.getRange(1, 1, chartDataValues.length, 2))
       .setOption("title", `${targetMonth}月のカテゴリー別金額`)
       .setOption("height", 400)
       .setOption("width", 600)
@@ -175,6 +179,6 @@ export class PaymentHistorySheet extends SpreadSheet {
       .build();
 
     // グラフをシートに挿入
-    chartDataSheet.insertChart(chart);
+    chartDataSheet.sheet.insertChart(chart);
   }
 }

@@ -52,18 +52,19 @@ export class SpreadSheetFactory {
     return activeSheet;
   }
 
-  static create(spreadSheet: GoogleAppsScript.Spreadsheet.Spreadsheet, sheet: GoogleAppsScript.Spreadsheet.Sheet) {
-    return new SpreadSheet(spreadSheet, sheet);
+  static create(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
+    return new SpreadSheet(sheet);
   }
 
   static createFromFileName(
     fileName: string,
+    sheetName: string,
     driveApp: GoogleAppsScript.Drive.DriveApp = DriveApp,
     spreadSheetApp: GoogleAppsScript.Spreadsheet.SpreadsheetApp = SpreadsheetApp
   ): SpreadSheet {
     const spreadSheet = this.createGasSpreadsheet(fileName, driveApp, spreadSheetApp);
-    const sheet = this.createGasSpreadSheetSheet(spreadSheet, fileName);
+    const sheet = this.createGasSpreadSheetSheet(spreadSheet, sheetName);
 
-    return this.create(spreadSheet, sheet);
+    return this.create(sheet);
   }
 }
