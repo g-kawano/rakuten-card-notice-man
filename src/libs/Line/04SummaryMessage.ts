@@ -1,4 +1,11 @@
-import { BoxContent, TextContent, ImageContent, SeparatorContent, FillerContent } from "@/libs/Line/02LineMessage";
+import {
+  BoxContentFactory,
+  TextContentFactory,
+  ImageContentFactory,
+  SeparatorContentFactory,
+  FillerContentFactory
+} from "@/factories/LineMessageFactory";
+import { ImageContent } from "@/libs/Line/02LineMessage";
 import { PaymentHistorySheet } from "../SpreadSheet/02PaymentHistorySheet";
 import { FixedCostSheet } from "../SpreadSheet/05FixedCostSheet";
 import { PieChartSheet } from "../SpreadSheet/04PieChartSheet";
@@ -50,9 +57,9 @@ export class SummaryMessage {
    * flex メッセージのヘッダーの Box コンテントを作成して返す
    */
   buildHeaderContent(): FlexBox {
-    const header = new BoxContent({ layout: "vertical", backgroundColor: "#1E90FF" });
+    const header = BoxContentFactory.create({ layout: "vertical", backgroundColor: "#1E90FF" });
 
-    const headerContent = new TextContent({
+    const headerContent = TextContentFactory.create({
       text: `${this.targetMonth} 月のまとめ💸`,
       align: "center",
       color: "#FFFFFFFF",
@@ -69,13 +76,13 @@ export class SummaryMessage {
    * flex メッセージのボディの Box コンテントを作成して返す
    */
   buildBodyContent(): FlexBox {
-    const bodyContent = new BoxContent({ layout: "vertical" });
+    const bodyContent = BoxContentFactory.create({ layout: "vertical" });
 
     bodyContent.addContent(this.buildSpendingContent());
-    bodyContent.addContent(new SeparatorContent("md"));
+    bodyContent.addContent(SeparatorContentFactory.create("md"));
     bodyContent.addContent(this.buildPreviousMonthAmountComparison());
     bodyContent.addContent(this.buildFixedCostContent());
-    bodyContent.addContent(new SeparatorContent("xl"));
+    bodyContent.addContent(SeparatorContentFactory.create("xl"));
     bodyContent.addContent(this.buildPieChartImageContent());
 
     return bodyContent.boxContent;
@@ -85,9 +92,9 @@ export class SummaryMessage {
    * ボディの収支表示用の Box コンテントを作成して返す
    */
   buildSpendingContent(): FlexBox {
-    const spendingContent = new BoxContent({ layout: "horizontal" });
+    const spendingContent = BoxContentFactory.create({ layout: "horizontal" });
 
-    const spendingKey = new TextContent({
+    const spendingKey = TextContentFactory.create({
       text: "支出：",
       weight: "bold",
       size: "md",
@@ -96,7 +103,7 @@ export class SummaryMessage {
 
     const totalAmount = this.paymentHistorySheet.sumColumn(2, 4) + this.fixedCostSheet.sumColumn(2, 3);
 
-    const spendingValue = new TextContent({
+    const spendingValue = TextContentFactory.create({
       text: `¥ ${totalAmount.toLocaleString()}`,
       align: "end",
       flex: 5,
@@ -123,11 +130,11 @@ export class SummaryMessage {
    * ボディの前月比の Box コンテントを作成して返す
    */
   buildPreviousMonthAmountComparison(): FlexBox {
-    const amountComparisonContent = new BoxContent({ layout: "horizontal", margin: "md" });
+    const amountComparisonContent = BoxContentFactory.create({ layout: "horizontal", margin: "md" });
 
-    const filler = new FillerContent();
+    const filler = FillerContentFactory.create();
 
-    const momKey = new TextContent({
+    const momKey = TextContentFactory.create({
       text: "前月比",
       weight: "bold",
       size: "md",
@@ -139,7 +146,7 @@ export class SummaryMessage {
     const allow = amountComparison > 0 ? "↑" : "↓";
     const color = amountComparison > 0 ? "#FF0000" : "#1E90FF";
 
-    const momValue = new TextContent({
+    const momValue = TextContentFactory.create({
       text: `${allow} ¥ ${amountComparison.toLocaleString()}`,
       align: "end",
       flex: 5,
@@ -162,15 +169,15 @@ export class SummaryMessage {
    * @param costValue 固定費金額
    */
   buildFixedCostContentRecord(isFirstRecord: boolean, costName: string, costValue: number): FlexBox {
-    const fixedCostRecordContent = new BoxContent({
+    const fixedCostRecordContent = BoxContentFactory.create({
       layout: "horizontal",
       margin: "xs",
       justifyContent: "flex-start"
     });
 
     if (isFirstRecord) {
-      const filler = new FillerContent();
-      const fixedKeyContent = new TextContent({
+      const filler = FillerContentFactory.create();
+      const fixedKeyContent = TextContentFactory.create({
         flex: 3,
         text: "固定費",
         size: "sm"
@@ -178,17 +185,17 @@ export class SummaryMessage {
       fixedCostRecordContent.addContent(filler);
       fixedCostRecordContent.addContent(fixedKeyContent.textContent);
     } else {
-      const filler = new FillerContent(4);
+      const filler = FillerContentFactory.create(4);
       fixedCostRecordContent.addContent(filler);
     }
 
-    const nameContent = new TextContent({
+    const nameContent = TextContentFactory.create({
       text: costName,
       flex: 3,
       size: "sm"
     });
 
-    const valueContent = new TextContent({
+    const valueContent = TextContentFactory.create({
       text: `¥ ${costValue.toLocaleString()}`,
       flex: 3,
       align: "end"
@@ -204,7 +211,7 @@ export class SummaryMessage {
    * ボディの固定費の Box コンテントを作成して返す
    */
   buildFixedCostContent(): FlexBox {
-    const amountComparisonContent = new BoxContent({ layout: "vertical", margin: "sm" });
+    const amountComparisonContent = BoxContentFactory.create({ layout: "vertical", margin: "sm" });
 
     for (const [index, record] of this.fixedCostSheet.scanRecord().entries()) {
       const isFirst = index === 0;
@@ -234,7 +241,7 @@ export class SummaryMessage {
     this.pieChartSheet.uploadChart(chartFileName);
     const imageUrl = this.pieChartSheet.downloadChartUrl(chartFileName);
 
-    const pieChartImageContent = new ImageContent({
+    const pieChartImageContent = ImageContentFactory.create({
       url: imageUrl,
       size: "full",
       align: "center"

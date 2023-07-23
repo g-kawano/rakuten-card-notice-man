@@ -1,10 +1,10 @@
-import { BoxContent, TextContent, ImageContent, SeparatorContent, FillerContent } from "@/libs/Line/02LineMessage";
+import { BoxContentFactory, TextContentFactory, ImageContentFactory, SeparatorContentFactory, FillerContentFactory } from "@/factories/LineMessageFactory";
 
 describe("FlexContentClasses", () => {
   describe("BoxContent", () => {
     it("should construct and add content correctly", () => {
-      const boxContent = new BoxContent({ layout: "vertical", backgroundColor: "#FFFFFF" });
-      const textContent = new TextContent({ text: "Hello" });
+      const boxContent = BoxContentFactory.create({ layout: "vertical", backgroundColor: "#FFFFFF" });
+      const textContent = TextContentFactory.create({ text: "Hello" });
 
       boxContent.addContent(textContent.textContent);
 
@@ -19,7 +19,7 @@ describe("FlexContentClasses", () => {
 
   describe("TextContent", () => {
     it("should construct correctly", () => {
-      const textContent = new TextContent({ text: "Hello", align: "center" });
+      const textContent = TextContentFactory.create({ text: "Hello", align: "center" });
       expect(textContent.textContent).toEqual({
         type: "text",
         text: "Hello",
@@ -31,7 +31,7 @@ describe("FlexContentClasses", () => {
 
   describe("ImageContent", () => {
     it("should construct correctly", () => {
-      const imageContent = new ImageContent({ url: "https://example.com/image.jpg", size: "full" });
+      const imageContent = ImageContentFactory.create({ url: "https://example.com/image.jpg", size: "full" });
       expect(imageContent).toEqual({
         type: "image",
         url: "https://example.com/image.jpg",
@@ -42,7 +42,7 @@ describe("FlexContentClasses", () => {
 
   describe("SeparatorContent", () => {
     it("should construct correctly", () => {
-      const separatorContent = new SeparatorContent("md");
+      const separatorContent = SeparatorContentFactory.create("md");
       expect(separatorContent).toEqual({
         type: "separator",
         margin: "md",
@@ -52,7 +52,7 @@ describe("FlexContentClasses", () => {
 
   describe("FillerContent", () => {
     it("should construct correctly", () => {
-      const fillerContent = new FillerContent(1);
+      const fillerContent = FillerContentFactory.create(1);
       expect(fillerContent).toEqual({
         type: "filler",
         flex: 1,

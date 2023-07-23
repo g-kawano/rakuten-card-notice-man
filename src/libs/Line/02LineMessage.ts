@@ -33,7 +33,7 @@ export class BoxContent {
   }
 }
 
-type TextContentProperties = {
+export type TextContentProperties = {
   text: string;
   wrap?: boolean;
   align?: "start" | "end" | "center";
