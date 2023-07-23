@@ -1,4 +1,5 @@
 import { Drive } from "@/libs/Drive/01Drive";
+import { DriveFactory } from "@/factories/DriveFactory";
 
 const mockDriveIterator = {
   hasNext: jest.fn(),
@@ -21,7 +22,7 @@ describe("Drive", () => {
         getName: jest.fn(() => targetFolderName),
       });
 
-      const drive = new Drive(mockDriveApp);
+      const drive = DriveFactory.create(mockDriveApp);
       const result = drive.findFolderByName(targetFolderName);
 
       expect(result.getName()).toEqual(targetFolderName);
@@ -30,7 +31,7 @@ describe("Drive", () => {
     it("should throw an error when the specified folder does not exist", () => {
       mockDriveIterator.hasNext.mockReturnValue(false);
 
-      const drive = new Drive(mockDriveApp);
+      const drive = DriveFactory.create(mockDriveApp);
 
       expect(() => drive.findFolderByName(targetFolderName)).toThrow(Error);
     });
@@ -45,7 +46,7 @@ describe("Drive", () => {
         getName: jest.fn(() => targetFileName),
       });
 
-      const drive = new Drive(mockDriveApp);
+      const drive = DriveFactory.create(mockDriveApp);
       const result = drive.findFileByName(targetFileName);
 
       expect(result.getName()).toEqual(targetFileName);
@@ -54,14 +55,14 @@ describe("Drive", () => {
     it("should throw an error when the specified file does not exist", () => {
       mockDriveIterator.hasNext.mockReturnValue(false);
 
-      const drive = new Drive(mockDriveApp);
+      const drive = DriveFactory.create(mockDriveApp);
 
       expect(() => drive.findFileByName(targetFileName)).toThrow(Error);
     });
   });
 
   describe("deleteFile", () => {
-    const drive = new Drive(mockDriveApp);
+    const drive = DriveFactory.create(mockDriveApp);
     const mockSetTrashed = jest.fn();
 
     jest.spyOn(drive, "findFolderByName").mockImplementation((folderName: string) => {

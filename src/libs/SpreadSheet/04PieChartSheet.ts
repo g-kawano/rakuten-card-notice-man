@@ -1,5 +1,5 @@
 import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
-import { Drive } from "@/libs/Drive/01Drive";
+import { DriveFactory } from "@/factories/DriveFactory";
 import { Setting } from "@/00Setting";
 
 /**
@@ -29,7 +29,7 @@ export class PieChartSheet extends SpreadSheet {
    * @param fileName アップロードするファイル名
    */
   uploadChart(fileName: string): void {
-    const drive = new Drive();
+    const drive = DriveFactory.create();
     const graphImg = this.getChartImg();
     const folder = drive.findFolderByName(this.setting.DRIVE_FOLDER_NAME);
     folder.createFile(graphImg.setName(fileName));
@@ -39,7 +39,7 @@ export class PieChartSheet extends SpreadSheet {
    * チャートの画像URLをダウンロードする
    */
   downloadChartUrl(fileName: string): string {
-    const drive = new Drive();
+    const drive = DriveFactory.create();
     const file = drive.findFileByName(fileName);
 
     if (file === null) {
