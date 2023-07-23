@@ -1,4 +1,5 @@
 import { NoticePaymentHistoryMessage } from "@/libs/Line/03NoticePaymentMessage";
+import { NoticePaymentHistoryMessageFactory } from "@/factories/NoticePaymentMessageFactory";
 import { Setting } from "@/00Setting";
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
 
@@ -22,7 +23,7 @@ describe("NoticePaymentHistoryMessage", () => {
     setting.DISPLAY_HIMSELF = null;
     setting.DISPLAY_FAMILY = null;
 
-    noticePaymentHistoryMessage = new NoticePaymentHistoryMessage(paymentHistoryList, setting);
+    noticePaymentHistoryMessage = NoticePaymentHistoryMessageFactory.create(paymentHistoryList, setting);
     paymentHistoryListObject = new PaymentHistoryList(paymentHistoryList);
   });
 
