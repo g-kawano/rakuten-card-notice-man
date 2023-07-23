@@ -4,6 +4,7 @@ import { FixedCostSheet } from "@/libs/SpreadSheet/05FixedCostSheet";
 import { PaymentHistorySheet } from "@/libs/SpreadSheet/02PaymentHistorySheet";
 import { FlexBox } from "@line/bot-sdk";
 import { PieChartSheet } from "@/libs/SpreadSheet/04PieChartSheet";
+import { Dependencies, SummaryMessageFactory } from "@/factories/SummaryMessageFactory";
 
 jest.mock("@/00Setting");
 jest.mock("@/libs/SpreadSheet/01SpreadSheet");
@@ -12,42 +13,27 @@ jest.mock("@/libs/SpreadSheet/05FixedCostSheet");
 jest.mock("@/libs/SpreadSheet/04PieChartSheet");
 
 describe("SummaryMessage", () => {
+  let mockDependencies: Dependencies;
   let summaryMessage: SummaryMessage;
   let setting: Setting;
-  let paymentHistorySheet: PaymentHistorySheet;
-  let previousPaymentHistorySheet: PaymentHistorySheet;
-  let fixedCostSheet: FixedCostSheet;
-  let pieChartSheet: PieChartSheet;
 
   beforeEach(() => {
     const targetYear = "2023";
     const targetMonth = "5";
 
+    setting = new Setting() as jest.Mocked<Setting>;
+    setting.MASTER_SPREAD_SHEET_FILE = "dummy";
+
     const dummySheetFile = "dummy" as unknown as GoogleAppsScript.Spreadsheet.Spreadsheet;
     const dummySheet = "dummy" as unknown as GoogleAppsScript.Spreadsheet.Sheet;
 
-    setting = new Setting() as jest.Mocked<Setting>;
-    paymentHistorySheet = new PaymentHistorySheet(dummySheetFile, dummySheet) as jest.Mocked<PaymentHistorySheet>;
+    mockDependencies = new Dependencies(targetYear, targetMonth, setting, "dummy", "dummy");
+    mockDependencies.fixedCostSheet = new FixedCostSheet(dummySheetFile, dummySheet);
+    mockDependencies.paymentHistorySheet = new PaymentHistorySheet(dummySheetFile, dummySheet);
+    mockDependencies.previousPaymentHistorySheet = new PaymentHistorySheet(dummySheetFile, dummySheet);
+    mockDependencies.pieChartSheet = new PieChartSheet(dummySheetFile, dummySheet);
 
-    previousPaymentHistorySheet = new PaymentHistorySheet(
-      dummySheetFile,
-      dummySheet
-    ) as jest.Mocked<PaymentHistorySheet>;
-
-    fixedCostSheet = new FixedCostSheet(dummySheetFile, dummySheet) as jest.Mocked<FixedCostSheet>;
-
-    pieChartSheet = new PieChartSheet(dummySheetFile, dummySheet) as jest.Mocked<PieChartSheet>;
-
-    setting.MASTER_SPREAD_SHEET_FILE = "dummy";
-
-    summaryMessage = new SummaryMessage(
-      targetYear,
-      targetMonth,
-      fixedCostSheet,
-      paymentHistorySheet,
-      previousPaymentHistorySheet,
-      pieChartSheet
-    );
+    summaryMessage = SummaryMessageFactory.create(mockDependencies);
   });
 
   afterEach(() => {
@@ -95,16 +81,35 @@ describe("SummaryMessage", () => {
 
   describe("buildBodyContent", () => {
     it("should return correct body object", () => {
-      paymentHistorySheet.sumColumn = jest.fn().mockReturnValue(2000);
-      previousPaymentHistorySheet.sumColumn = jest.fn().mockReturnValue(2000);
-      fixedCostSheet.sumColumn = jest.fn().mockReturnValue(2000);
-      fixedCostSheet.scanRecord = jest.fn().mockReturnValue([
-        ["固定費1", 1000],
-        ["固定費2", 200],
-        ["固定費3", 0]
-      ]);
-      pieChartSheet.uploadChart = jest.fn();
-      pieChartSheet.downloadChartUrl = jest.fn().mockReturnValue("https://dummy.com");
+      mockDependencies.paymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2000)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.previousPaymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2000)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.fixedCostSheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2000),
+          scanRecord: jest.fn(() => [
+            ["固定費1", 1000],
+            ["固定費2", 200],
+            ["固定費3", 0]
+          ])
+        };
+      })() as FixedCostSheet;
+      mockDependencies.pieChartSheet = jest.fn().mockImplementation(() => {
+        return {
+          uploadChart: jest.fn(),
+          downloadChartUrl: jest.fn(() => "https://dummy.com")
+        };
+      })() as PieChartSheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.buildBodyContent();
 
@@ -114,9 +119,24 @@ describe("SummaryMessage", () => {
 
   describe("buildSpendingContent", () => {
     it("should return correct spending content object", () => {
-      paymentHistorySheet.sumColumn = jest.fn().mockReturnValue(2000);
-      previousPaymentHistorySheet.sumColumn = jest.fn().mockReturnValue(2000);
-      fixedCostSheet.sumColumn = jest.fn().mockReturnValue(2000);
+      mockDependencies.paymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2000)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.previousPaymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2000)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.fixedCostSheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2000)
+        };
+      })() as FixedCostSheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.buildSpendingContent();
 
@@ -142,8 +162,19 @@ describe("SummaryMessage", () => {
 
   describe("calcPreviousMonthAmountComparison", () => {
     it("should return correct amount comparison positive value", () => {
-      jest.spyOn(paymentHistorySheet, "sumColumn").mockReturnValue(10000);
-      jest.spyOn(previousPaymentHistorySheet, "sumColumn").mockReturnValue(2500);
+      mockDependencies.paymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 10000)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.previousPaymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2500)
+        };
+      })() as PaymentHistorySheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.calcPreviousMonthAmountComparison();
 
@@ -151,8 +182,19 @@ describe("SummaryMessage", () => {
     });
 
     it("should return correct amount comparison negative value", () => {
-      jest.spyOn(paymentHistorySheet, "sumColumn").mockReturnValue(2500);
-      jest.spyOn(previousPaymentHistorySheet, "sumColumn").mockReturnValue(10000);
+      mockDependencies.paymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2500)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.previousPaymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 10000)
+        };
+      })() as PaymentHistorySheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.calcPreviousMonthAmountComparison();
 
@@ -162,8 +204,19 @@ describe("SummaryMessage", () => {
 
   describe("buildPreviousMonthAmountComparison", () => {
     it("should return correct amount comparison content when calc result positive value", () => {
-      jest.spyOn(paymentHistorySheet, "sumColumn").mockReturnValue(10000);
-      jest.spyOn(previousPaymentHistorySheet, "sumColumn").mockReturnValue(2500);
+      mockDependencies.paymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 10000)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.previousPaymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2500)
+        };
+      })() as PaymentHistorySheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.buildPreviousMonthAmountComparison();
 
@@ -191,8 +244,19 @@ describe("SummaryMessage", () => {
     });
 
     it("should return correct amount comparison content when calc result negative value", () => {
-      jest.spyOn(paymentHistorySheet, "sumColumn").mockReturnValue(2500);
-      jest.spyOn(previousPaymentHistorySheet, "sumColumn").mockReturnValue(10000);
+      mockDependencies.paymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2500)
+        };
+      })() as PaymentHistorySheet;
+      mockDependencies.previousPaymentHistorySheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 10000)
+        };
+      })() as PaymentHistorySheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.buildPreviousMonthAmountComparison();
 
@@ -221,13 +285,22 @@ describe("SummaryMessage", () => {
   });
 
   describe("buildFixedCostContentRecord", () => {
+    beforeEach(() => {
+      mockDependencies.fixedCostSheet = jest.fn().mockImplementation(() => {
+        return {
+          sumColumn: jest.fn(() => 2000),
+          scanRecord: jest.fn(() => [
+            ["固定費1", 1000],
+            ["固定費2", 200],
+            ["固定費3", 0]
+          ])
+        };
+      })() as FixedCostSheet;
+    });
+
     it("should return correct fixed content when first record is true", () => {
-      fixedCostSheet.sumColumn = jest.fn().mockReturnValue(2000);
-      fixedCostSheet.scanRecord = jest.fn().mockReturnValue([
-        ["固定費1", 1000],
-        ["固定費2", 200],
-        ["固定費3", 0]
-      ]);
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.buildFixedCostContentRecord(true, "cost", 1000);
 
@@ -254,12 +327,8 @@ describe("SummaryMessage", () => {
     });
 
     it("should return correct fixed content when first record is false", () => {
-      fixedCostSheet.sumColumn = jest.fn().mockReturnValue(2000);
-      fixedCostSheet.scanRecord = jest.fn().mockReturnValue([
-        ["固定費1", 1000],
-        ["固定費2", 200],
-        ["固定費3", 0]
-      ]);
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.buildFixedCostContentRecord(false, "cost", 1000);
 
@@ -285,11 +354,18 @@ describe("SummaryMessage", () => {
 
   describe("buildFixedCostContent", () => {
     it("should return correct fixed content", () => {
-      fixedCostSheet.scanRecord = jest.fn().mockReturnValue([
-        ["固定費1", 1000],
-        ["固定費2", 200],
-        ["固定費3", 0]
-      ]);
+      mockDependencies.fixedCostSheet = jest.fn().mockImplementation(() => {
+        return {
+          scanRecord: jest.fn(() => [
+            ["固定費1", 1000],
+            ["固定費2", 200],
+            ["固定費3", 0]
+          ])
+        };
+      })() as FixedCostSheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const mockBuildFixedCostContentRecord = jest
         .spyOn(summaryMessage, "buildFixedCostContentRecord")
@@ -311,13 +387,27 @@ describe("SummaryMessage", () => {
     });
 
     it("should throw error when cost name is not string", () => {
-      jest.spyOn(fixedCostSheet, "scanRecord").mockReturnValue([[1000, 1000]]);
+      mockDependencies.fixedCostSheet = jest.fn().mockImplementation(() => {
+        return {
+          scanRecord: jest.fn(() => [[1000, 1000]])
+        };
+      })() as FixedCostSheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       expect(() => summaryMessage.buildFixedCostContent()).toThrow(Error("Cost name is not string!"));
     });
 
     it("should throw error when cost value is not number", () => {
-      jest.spyOn(fixedCostSheet, "scanRecord").mockReturnValue([["固定費1", "固定費1"]]);
+      mockDependencies.fixedCostSheet = jest.fn().mockImplementation(() => {
+        return {
+          scanRecord: jest.fn(() => [["固定費1", "固定費1"]])
+        };
+      })() as FixedCostSheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       expect(() => summaryMessage.buildFixedCostContent()).toThrow(Error("Cost value is not number!"));
     });
@@ -325,8 +415,15 @@ describe("SummaryMessage", () => {
 
   describe("buildPieChartImageContent", () => {
     it("should return correct pie chart image content", () => {
-      pieChartSheet.uploadChart = jest.fn();
-      pieChartSheet.downloadChartUrl = jest.fn().mockReturnValue("https://dummy.com");
+      mockDependencies.pieChartSheet = jest.fn().mockImplementation(() => {
+        return {
+          uploadChart: jest.fn(),
+          downloadChartUrl: jest.fn(() => "https://dummy.com")
+        };
+      })() as PieChartSheet;
+
+      // 変更した mockDependencies を使って再度インスタンスを生成
+      summaryMessage = SummaryMessageFactory.create(mockDependencies);
 
       const result = summaryMessage.buildPieChartImageContent();
 
