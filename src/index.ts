@@ -1,4 +1,4 @@
-import { PaymentHistoryMail } from "@/libs/Gmail/01PaymentHistoryMail";
+import { PaymentHistoryMailFactory } from "@/factories/PaymentHistoryMailFactory";
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
 import { NoticePaymentHistoryMessage } from "@/libs/Line/03NoticePaymentMessage";
 import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
@@ -18,7 +18,7 @@ const main = () => {
 
   if (mail === undefined) return;
 
-  const paymentHistoryMail = new PaymentHistoryMail(mail.getPlainBody());
+  const paymentHistoryMail = PaymentHistoryMailFactory.create(mail.getPlainBody());
 
   const messageReceivedDate = mail.getDate().toString();
   if (!shouldNoticeMessage(messageReceivedDate)) return;
