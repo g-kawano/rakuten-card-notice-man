@@ -1,4 +1,5 @@
 import { PaymentHistoryMailFactory } from "@/factories/PaymentHistoryMailFactory";
+import { LineFactory } from "@/factories/LineFactory";
 import { PaymentHistory, PaymentHistoryList } from "@/libs/01PaymentHistory";
 import { NoticePaymentHistoryMessage } from "@/libs/Line/03NoticePaymentMessage";
 import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
@@ -92,7 +93,7 @@ const savePaymentHistorySheet = (paymentHistoryList: PaymentHistory[]) => {
  * @param paymentHistoryList 決済履歴情報リストクラス
  */
 const sendPaymentHistoryMessage = (paymentHistoryList: PaymentHistory[]) => {
-  const lineClient = new Line();
+  const lineClient = LineFactory.create();
   // 通知メッセージ作成
   const noticeMessages = new NoticePaymentHistoryMessage(paymentHistoryList);
 
@@ -124,7 +125,7 @@ const createChart = (today: Date) => {
  * @param today new Date()
  */
 const sendSummaryMessage = (today: Date) => {
-  const lineClient = new Line();
+  const lineClient = LineFactory.create();
   const targetYear = today.getFullYear().toString();
   const targetMonth = today.getMonth().toString();
   const fileName = `楽天カード決済履歴シート_${targetYear}`;

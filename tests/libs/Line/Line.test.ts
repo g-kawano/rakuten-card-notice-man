@@ -1,6 +1,7 @@
 import { Client, Message } from "@line/bot-sdk";
 import { Setting } from "@/00Setting";
 import { Line } from "@/libs/Line/01Line";
+import { LineFactory } from "@/factories/LineFactory";
 
 jest.mock("@line/bot-sdk");
 jest.mock("@/00Setting");
@@ -22,7 +23,7 @@ describe("Line class tests", () => {
     mockSettingInstance.LINE_CHANNEL_ACCESS_TOKEN = "test_token";
     mockSettingInstance.LINE_GROUP_ID = "test_group";
 
-    mockLineInstance = new Line(new Client({ channelAccessToken: "test_token" }), mockSettingInstance);
+    mockLineInstance = LineFactory.create(new Client({ channelAccessToken: "test_token" }), mockSettingInstance);
   });
 
   it("should correctly push a message", () => {
