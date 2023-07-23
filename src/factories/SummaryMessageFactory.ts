@@ -5,6 +5,9 @@ import { FixedCostSheet } from "@/libs/SpreadSheet/05FixedCostSheet";
 import { SummaryMessage } from "@/libs/Line/04SummaryMessage";
 import { Setting } from "@/00Setting";
 
+/**
+ * 依存関係をまとめたクラス
+ */
 export class Dependencies {
   targetYear: string;
   targetMonth: string;
@@ -56,6 +59,9 @@ export class Dependencies {
   }
 }
 
+/**
+ * SummaryMessage クラスのインスタンスを生成するファクトリクラス
+ */
 export class SummaryMessageFactory {
   static create(deps?: Dependencies): SummaryMessage {
     const dependencies = deps || new Dependencies();

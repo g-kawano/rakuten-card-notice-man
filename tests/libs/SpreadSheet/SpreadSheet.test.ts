@@ -1,4 +1,5 @@
 import { SpreadSheet } from "@/libs/SpreadSheet/01SpreadSheet";
+import { SpreadSheetFactory } from "@/factories/SpreadSheetFactory";
 
 /**
  * DriveApp が返すイテレータのモック
@@ -50,7 +51,7 @@ describe("SpreadSheet", () => {
       getLastRow: jest.fn()
     } as unknown as GoogleAppsScript.Spreadsheet.Sheet;
 
-    spreadSheet = new SpreadSheet(mockedSpreadsheet, mockedSheet);
+    spreadSheet = SpreadSheetFactory.create(mockedSpreadsheet, mockedSheet);
   });
 
   describe("getSpreadsheet", () => {
