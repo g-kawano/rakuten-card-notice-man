@@ -33,8 +33,10 @@ const main = () => {
 
   if (!shouldCreateChart(today)) return;
 
-  createChart(today);
-  sendSummaryMessage(today);
+  const last_month = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+  createChart(last_month);
+  sendSummaryMessage(last_month);
 };
 
 /**
